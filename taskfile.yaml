@@ -1,0 +1,37 @@
+version: '3'
+
+tasks:
+  run:dev:
+    desc: Run the app in development mode
+    cmds:
+      - flutter run --flavor development --target lib/main_development.dart
+
+  run:staging:
+    desc: Run the app in staging mode
+    cmds:
+      - flutter run --flavor staging --target lib/main_staging.dart
+
+  run:prod:
+    desc: Run the app in production mode
+    cmds:
+      - flutter run --flavor production --target lib/main_production.dart
+
+  build:apk:
+    desc: Build APK for production
+    cmds:
+      - flutter build apk --flavor production --target lib/main_production.dart
+
+  build:ios:
+    desc: Build iOS app for production
+    cmds:
+      - flutter build ios --flavor production --target lib/main_production.dart
+
+  test:
+    desc: Run all tests
+    cmds:
+      - flutter test
+
+  analyze:
+    desc: Run Flutter analyzer
+    cmds:
+      - flutter analyze
