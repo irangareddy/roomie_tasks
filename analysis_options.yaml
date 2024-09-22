@@ -1,4 +1,11 @@
 include: package:very_good_analysis/analysis_options.6.0.0.yaml
+analyzer:
+  errors:
+    invalid_annotation_target: ignore
+    use_build_context_synchronously: ignore
+    no_default_cases: ignore
+  exclude: [build/**, lib/**.freezed.dart, lib/**.g.dart]
 linter:
   rules:
     public_member_api_docs: false
+    flutter_style_todos: true

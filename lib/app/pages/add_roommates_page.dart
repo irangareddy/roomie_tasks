@@ -49,7 +49,8 @@ class _AddRoommatesPageState extends State<AddRoommatesPage> {
   Future<void> _removeRoommate(int index) async {
     if (_worksheet != null) {
       await _worksheet!.deleteRow(
-          index + 2,); // +2 because sheet is 1-indexed and we have a header row
+        index + 2,
+      ); // +2 because sheet is 1-indexed and we have a header row
       setState(() {
         roommates.removeAt(index);
       });
@@ -134,8 +135,10 @@ class _AddRoommatesPageState extends State<AddRoommatesPage> {
             ),
             ElevatedButton(
               onPressed: roommates.isNotEmpty
-                  ? () => context.go(AppRoutes.addTasks, 
-                  extra: widget.spreadsheet,)
+                  ? () => context.go(
+                        AppRoutes.addTasks,
+                        extra: widget.spreadsheet,
+                      )
                   : null,
               child: const Text('Next: Add Tasks'),
             ),

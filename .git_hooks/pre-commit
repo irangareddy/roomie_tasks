@@ -1,0 +1,31 @@
+#!/bin/sh
+
+echo "Running pre-commit hook"
+
+# Run Flutter format
+echo "Running Flutter format..."
+dart format .
+
+# Run Flutter analyze
+echo "Running Flutter analyze..."
+flutter analyze
+
+# Run custom lint (if you have it set up)
+echo "Running custom lint..."
+flutter pub run custom_lint
+
+# Run Flutter tests
+echo "Running Flutter tests..."
+flutter test
+
+# Check the exit code of the last command
+if [ $? -ne 0 ]; then
+  echo "Pre-commit checks failed. Please fix the issues before committing."
+  exit 1
+fi
+
+# If everything passed, add the formatted files to the commit
+git add .
+
+echo "Pre-commit hook passed"
+exit 0

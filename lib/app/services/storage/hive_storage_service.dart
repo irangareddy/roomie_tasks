@@ -21,6 +21,7 @@ class HiveStorageService implements StorageService {
   dynamic get(String key) {
     return _hiveBox?.get(key);
   }
+
   @override
   bool has(String key) {
     return _hiveBox?.containsKey(key) ?? false;

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+commit_msg_file=$1
+
+dart run ./.git_hooks/commit_message.dart "$commit_msg_file"
+
+exit $?

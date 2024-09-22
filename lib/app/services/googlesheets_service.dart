@@ -12,7 +12,9 @@ class GoogleSheetsService {
   late Worksheet? _metadataSheet;
 
   Future<Spreadsheet> initialize(
-      String? credentials, String? spreadsheetId,) async {
+    String? credentials,
+    String? spreadsheetId,
+  ) async {
     if (credentials == null || spreadsheetId == null) {
       throw Exception('Credentials or spreadsheet ID not found');
     }

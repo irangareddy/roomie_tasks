@@ -181,8 +181,10 @@ class _AddTasksPageState extends State<AddTasksPage> {
             ),
             ElevatedButton(
               onPressed: tasks.isNotEmpty
-                  ? () => context.go(AppRoutes.addRoommates,
-                      extra: widget.spreadsheet,)
+                  ? () => context.go(
+                        AppRoutes.addRoommates,
+                        extra: widget.spreadsheet,
+                      )
                   : null,
               child: const Text('Next: View Task List'),
             ),

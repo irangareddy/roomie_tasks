@@ -1,5 +1,3 @@
 import 'package:flutter/foundation.dart';
 
-
-class TaskProvider with ChangeNotifier {
-}
+class TaskProvider with ChangeNotifier {}

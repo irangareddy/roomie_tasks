@@ -45,7 +45,9 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
   }
 
   Future<void> _initializeGSheets(
-      String credentials, String spreadsheetId,) async {
+    String credentials,
+    String spreadsheetId,
+  ) async {
     try {
       _spreadsheet =
           await _sheetsService.initialize(credentials, spreadsheetId);

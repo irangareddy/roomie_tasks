@@ -1,37 +1,79 @@
 version: '3'
 
 tasks:
-  run:dev:
-    desc: Run the app in development mode
+
+  default:
+    summary: |
+      Just a list of documented tasks.
+    silent: true
+    cmds:
+      - task --list
+
+  check:
+    desc: Checks
+    deps:
+      - get
+      - format
+      - analyze
+
+  get:
+    desc: Install Flutter dependencies
+    cmds:
+      - flutter packages get
+
+  format:
+    desc: Dark format
+    cmds:
+      - dart format .
+
+  analyze:
+    desc: Run Flutter analyze
+    cmds:
+      - flutter analyze
+
+  br:
+    desc: dart run build_runner build
+    cmds:
+      - dart run build_runner build --delete-conflicting-outputs
+
+  build:apk:
+    desc: Build for Android
+    cmds:
+      - flutter build apk --flavor production --target lib/main_production.dart
+  
+  build:appbundle:
+    desc: Build for Android (App Bundle)
+    cmds:
+      - flutter build appbundle --flavor production --target lib/main_production.dart
+
+
+  build:ipa:
+    desc: Build an IPA (iOS)
+    cmds:
+      - flutter build ipa --release --flavor production --target lib/main_production.dart
+
+  dev:
+    desc: Run the development flavor
     cmds:
       - flutter run --flavor development --target lib/main_development.dart
 
-  run:staging:
-    desc: Run the app in staging mode
+  staging:
+    desc: Run the staging flavor 
     cmds:
       - flutter run --flavor staging --target lib/main_staging.dart
 
-  run:prod:
-    desc: Run the app in production mode
+  production:
+    desc: Run the production flavor
     cmds:
       - flutter run --flavor production --target lib/main_production.dart
 
-  build:apk:
-    desc: Build APK for production
-    cmds:
-      - flutter build apk --flavor production --target lib/main_production.dart
-
-  build:ios:
-    desc: Build iOS app for production
-    cmds:
-      - flutter build ios --flavor production --target lib/main_production.dart
-
   test:
-    desc: Run all tests
+    desc: Run unit and widget tests with coverage
     cmds:
-      - flutter test
+      - flutter test --coverage --test-randomize-ordering-seed random
 
-  analyze:
-    desc: Run Flutter analyzer
+  coverage:
+    desc: Generate and open a coverage report
     cmds:
-      - flutter analyze
+      - genhtml coverage/lcov.info -o coverage/
+      - open coverage/index.html

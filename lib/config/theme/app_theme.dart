@@ -32,9 +32,7 @@ class AppTheme {
         border: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey[300]!),
         ),
-        focusedBorder: const OutlineInputBorder(
-          
-        ),
+        focusedBorder: const OutlineInputBorder(),
         labelStyle: const TextStyle(color: Colors.black54),
       ),
       useMaterial3: true,

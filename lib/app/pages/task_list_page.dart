@@ -100,15 +100,14 @@ class _TaskListPageState extends State<TaskListPage> {
         assignedTasks = dataRows
             .map((row) {
               try {
-                
                 return {
-                 // ignore: avoid_dynamic_calls 
+                  // ignore: avoid_dynamic_calls
                   'taskName': row[0],
-                   // ignore: avoid_dynamic_calls
+                  // ignore: avoid_dynamic_calls
                   'assignedTo': row[1],
-                   // ignore: avoid_dynamic_calls
+                  // ignore: avoid_dynamic_calls
                   'dueDate': DateTime.parse(row[2] as String),
-                   // ignore: avoid_dynamic_calls
+                  // ignore: avoid_dynamic_calls
                   'status': row[3],
                 };
               } catch (e) {

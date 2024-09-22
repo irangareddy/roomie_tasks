@@ -39,8 +39,8 @@ class Roommate {
   // Override toString for easy printing/debugging
   @override
   String toString() {
-    return 
-    'Roommate(id: $id, name: $name, email: $email, phoneNumber: $phoneNumber)';
+    return 'Roommate(id: $id, '
+        'name: $name, email: $email, phoneNumber: $phoneNumber)';
   }
 
   // Create a copy of the Roommate with optional new values

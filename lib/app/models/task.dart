@@ -8,7 +8,6 @@ enum TaskStatus {
 }
 
 class Task {
-
   Task({
     required this.id,
     required this.name,
