@@ -21,8 +21,7 @@ final router = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.addRoommates,
-      builder: (context, state) =>
-          AddRoommatesPage(spreadsheet: state.extra! as Spreadsheet),
+      builder: (context, state) => const AddRoommatesPage(),
     ),
     GoRoute(
       path: AppRoutes.addTasks,

@@ -10,6 +10,7 @@ class DependencyManager {
     debugPrint('Started Dependency Manager');
     // Services
     final StorageService hiveStorageService = HiveStorageService();
+    await hiveStorageService.init();
     sl
       ..registerSingleton<StorageService>(hiveStorageService)
       ..registerSingleton<GoogleSheetsService>(GoogleSheetsService())
@@ -18,7 +19,7 @@ class DependencyManager {
       ..registerSingleton<GoogleSheetsSetupProvider>(
         GoogleSheetsSetupProvider(sl()),
       )
-      ..registerSingleton<RoommateProvider>(RoommateProvider())
+      ..registerSingleton<RoommateProvider>(RoommateProvider(sl()))
       ..registerSingleton<TaskProvider>(TaskProvider());
   }
 }
