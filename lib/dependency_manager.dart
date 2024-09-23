@@ -14,8 +14,8 @@ class DependencyManager {
     sl
       ..registerSingleton<StorageService>(hiveStorageService)
       ..registerSingleton<GoogleSheetsService>(GoogleSheetsService())
-      ..registerSingleton<OnboardingService>(OnboardingService(hiveStorageService))
-
+      ..registerSingleton<OnboardingService>(
+          OnboardingService(hiveStorageService),)
 
       // Providers
       ..registerSingleton<GoogleSheetsSetupProvider>(

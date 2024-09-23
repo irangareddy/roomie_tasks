@@ -87,12 +87,9 @@ class GoogleSheetsSetupPage extends StatelessWidget {
   ) {
     return ElevatedButton(
       onPressed: provider.isConnected && provider.spreadsheet != null
-          ? () => context.go(
-                AppRoutes.addRoommates,
-                extra: provider.spreadsheet,
-              )
+          ? () => context.go(AppRoutes.taskList)
           : null,
-      child: const Text('Next: Add Roommates'),
+      child: const Text('Add Tasks'),
     );
   }
 

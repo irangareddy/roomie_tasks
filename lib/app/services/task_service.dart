@@ -7,8 +7,11 @@ import 'package:roomie_tasks/app/services/services.dart';
 
 class TaskService {
   // Constructor
-  TaskService(this.taskTemplatesSheet, this.assignedTasksSheet,
-      this.googleSheetsService,);
+  TaskService(
+    this.taskTemplatesSheet,
+    this.assignedTasksSheet,
+    this.googleSheetsService,
+  );
 
   // Fields
   final Worksheet taskTemplatesSheet;
@@ -121,7 +124,9 @@ class TaskService {
 
   // Task generation and scheduling methods
   Future<List<Task>> generateWeeklyTasks(
-      List<String> roommates, DateTime startDate,) async {
+    List<String> roommates,
+    DateTime startDate,
+  ) async {
     try {
       await clearFutureTasks();
       final endDate = startDate.add(const Duration(days: 7));
@@ -131,7 +136,10 @@ class TaskService {
       for (final template in taskTemplates) {
         if (_shouldAssignTaskThisWeek(template.frequency, startDate)) {
           final assignedRoommate = _assignmentOrder.getNextRoommate(
-              template.name, roommates, startDate,);
+            template.name,
+            roommates,
+            startDate,
+          );
           final assignedTask = Task(
             id: ServiceUtils.generateUniqueId(),
             templateId: template.id,
@@ -161,7 +169,8 @@ class TaskService {
 
   Future<void> generateTasksIfNeeded() async {
     final lastGenerationDate = DateTime.parse(
-        await getMetadata('lastTaskGenerationDate') ?? '2000-01-01',);
+      await getMetadata('lastTaskGenerationDate') ?? '2000-01-01',
+    );
     final today = DateTime.now();
 
     if (today.difference(lastGenerationDate).inDays >= 7) {
@@ -203,7 +212,9 @@ class TaskService {
     final startOfWeek = today.subtract(Duration(days: today.weekday - 1));
     for (var i = 0; i < 4; i++) {
       await generateWeeklyTasks(
-          roommateNames, startOfWeek.add(Duration(days: 7 * i)),);
+        roommateNames,
+        startOfWeek.add(Duration(days: 7 * i)),
+      );
     }
 
     await _saveAssignmentOrder();
@@ -252,7 +263,9 @@ class TaskService {
   }
 
   Future<void> _updateRoommateNameInAssignedTasks(
-      String oldName, String newName,) async {
+    String oldName,
+    String newName,
+  ) async {
     final tasks = await loadAssignedTasks();
     for (final task in tasks) {
       if (task.assignedTo == oldName) {
@@ -277,7 +290,10 @@ class TaskService {
           final assignmentDate =
               task.startDate!.isAfter(now) ? task.startDate : now;
           final newAssignee = _assignmentOrder.getNextRoommate(
-              task.name, remainingNames, assignmentDate!,);
+            task.name,
+            remainingNames,
+            assignmentDate!,
+          );
           final updatedTask = Task(
             id: task.id,
             templateId: task.templateId,
