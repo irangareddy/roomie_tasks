@@ -171,22 +171,18 @@ class _AddTasksPageState extends State<AddTasksPage> {
                     children: _templateTasks.map((task) {
                       return ActionChip(
                         labelPadding: const EdgeInsets.symmetric(
-                            horizontal: 2,),
+                          horizontal: 2,
+                        ),
                         padding: const EdgeInsets.all(
-                            2,),
-                            
+                          2,
+                        ),
                         avatar: Text(
-                          
                           task['emoji'] as String,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall, 
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                         label: Text(
                           task['name'] as String,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall, 
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                         onPressed: () {
                           _taskNameController.text = task['name'] as String;

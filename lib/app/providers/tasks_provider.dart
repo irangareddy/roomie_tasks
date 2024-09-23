@@ -59,7 +59,9 @@ class TaskProvider with ChangeNotifier {
   }
 
   Future<void> generateWeeklyTasks(
-      List<String> roommates, DateTime startDate,) async {
+    List<String> roommates,
+    DateTime startDate,
+  ) async {
     final newTasks = await _sheetsService.taskService
         .generateWeeklyTasks(roommates, startDate);
     _assignedTasks.addAll(newTasks);

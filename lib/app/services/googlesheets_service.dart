@@ -10,7 +10,9 @@ class GoogleSheetsService {
   late Worksheet _metadataSheet;
 
   Future<Spreadsheet> initialize(
-      String credentials, String spreadsheetId,) async {
+    String credentials,
+    String spreadsheetId,
+  ) async {
     _gsheets = GSheets(credentials);
     try {
       _spreadsheet = await _gsheets.spreadsheet(spreadsheetId);

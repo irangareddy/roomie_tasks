@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:roomie_tasks/app/providers/providers.dart';
+import 'package:roomie_tasks/app/providers/theme_provider.dart';
 import 'package:roomie_tasks/config/routes/routes.dart';
 import 'package:roomie_tasks/config/theme/app_theme.dart';
 import 'package:roomie_tasks/dependency_manager.dart';
@@ -22,13 +23,21 @@ class App extends StatelessWidget {
         ListenableProvider<TaskProvider>(
           create: (context) => sl.get<TaskProvider>(),
         ),
+        ListenableProvider<ThemeProvider>(
+          create: (context) => sl.get<ThemeProvider>(),
+        ),
       ],
-      child: MaterialApp.router(
-        routerConfig: router,
-        theme: AppTheme.lightTheme(),
-        darkTheme: AppTheme.darkTheme(),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp.router(
+            routerConfig: router,
+            theme: AppTheme.lightTheme(),
+            darkTheme: AppTheme.darkTheme(),
+            themeMode: themeProvider.themeMode,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          );
+        },
       ),
     );
   }

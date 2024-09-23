@@ -96,36 +96,6 @@ class _TaskListPageState extends State<TaskListPage> {
     }
   }
 
-  Future<void> _wipeOffAssignedTasks() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Wipe Off All Roomie Tasks'),
-          content: const Text(
-            // ignore: lines_longer_than_80_chars
-              'Are you sure you want to delete all assigned tasks? This action cannot be undone.',),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            TextButton(
-              child: const Text('Wipe Off'),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed ?? false) {
-      setState(() => _isLoading = true);
-      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-      await taskProvider.wipeOffAssignedTasks();
-      setState(() => _isLoading = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,9 +126,9 @@ class _TaskListPageState extends State<TaskListPage> {
             tooltip: 'Manage Template Tasks',
           ),
           IconButton(
-            icon: const Icon(Icons.delete_forever),
-            onPressed: _wipeOffAssignedTasks,
-            tooltip: 'Wipe Off All Roomie Tasks',
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.push(AppRoutes.settings),
+            tooltip: 'Settings',
           ),
         ],
       ),
@@ -205,11 +175,13 @@ class _TaskListPageState extends State<TaskListPage> {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 10),
-                      Text(
+                        Text(
                           'Tap the refresh button to generate tasks.',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
-                        const SizedBox(height: 200,),
+                        const SizedBox(
+                          height: 200,
+                        ),
                       ],
                     ),
                   );

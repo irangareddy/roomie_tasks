@@ -28,7 +28,9 @@ class TaskFrequency {
 
 class Task {
   Task({
-    required this.name, required this.frequency, String? id,
+    required this.name,
+    required this.frequency,
+    String? id,
     this.templateId,
     this.startDate,
     this.endDate,

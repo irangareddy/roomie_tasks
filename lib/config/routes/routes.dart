@@ -5,6 +5,7 @@ import 'package:roomie_tasks/app/pages/add_roommates_page.dart';
 import 'package:roomie_tasks/app/pages/add_tasks_page.dart';
 import 'package:roomie_tasks/app/pages/googlesheets_setup_page.dart';
 import 'package:roomie_tasks/app/pages/onboarding/splash_screen.dart';
+import 'package:roomie_tasks/app/pages/settings_page.dart';
 import 'package:roomie_tasks/app/pages/task_list_page.dart';
 import 'package:roomie_tasks/app/providers/googlesheets_setup_provider.dart';
 import 'package:roomie_tasks/app/services/onboarding_service.dart';
@@ -17,6 +18,7 @@ class AppRoutes {
   static const addRoommates = '/add-roommates';
   static const addTasks = '/add-tasks';
   static const taskList = '/task-list';
+  static const settings = '/settings';
 }
 
 final router = GoRouter(
@@ -55,19 +57,23 @@ final router = GoRouter(
       path: AppRoutes.taskList,
       builder: (context, state) => const TaskListPage(),
     ),
+    GoRoute(
+      path: AppRoutes.settings,
+      builder: (context, state) => const SettingsPage(),
+    ),
   ],
   redirect: (BuildContext context, GoRouterState state) async {
     final onboardingService = sl<OnboardingService>();
     final isOnboardingCompleted =
         await onboardingService.isOnboardingCompleted();
 
-    // If onboarding is not completed and we're not already on the splash 
+    // If onboarding is not completed and we're not already on the splash
     // screen, redirect to splash
     if (!isOnboardingCompleted && state.uri.toString() != AppRoutes.splash) {
       return AppRoutes.splash;
     }
 
-    // If onboarding is completed and we're on the splash screen, 
+    // If onboarding is completed and we're on the splash screen,
     // redirect to home
     if (isOnboardingCompleted && state.uri.toString() == AppRoutes.splash) {
       return AppRoutes.home;
