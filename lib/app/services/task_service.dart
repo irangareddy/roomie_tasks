@@ -86,7 +86,9 @@ class TaskService {
 
   // CRUD operations for assigned tasks
   Future<List<Task>> loadAssignedTasks() async {
+    print('called load assigned tasks in task service');
     final rows = await assignedTasksSheet.values.allRows(fromRow: 2);
+    print(rows);
     return rows
         .map((row) {
           try {
@@ -102,15 +104,34 @@ class TaskService {
   }
 
   Future<void> addAssignedTask(Task task) async {
-    await assignedTasksSheet.values.appendRow(_assignedTaskToRow(task));
+    final taskWithOriginalAssignee = task.originalAssignee == null
+        ? task.copyWith(originalAssignee: task.assignedTo)
+        : task;
+
+    // Only update assignment order for tasks with a templateId
+    if (taskWithOriginalAssignee.templateId != null) {
+      _assignmentOrder.updateAssignment(
+        taskWithOriginalAssignee.name,
+        taskWithOriginalAssignee.assignedTo!,
+      );
+    }
+
+    await assignedTasksSheet.values
+        .appendRow(_assignedTaskToRow(taskWithOriginalAssignee));
   }
 
   Future<void> updateAssignedTask(Task task) async {
     final rowIndex =
         await ServiceUtils.findRowIndexById(assignedTasksSheet, task.id);
     if (rowIndex != null) {
+      final existingTask =
+          _rowToAssignedTask(await assignedTasksSheet.values.row(rowIndex));
+      final updatedTask = task.copyWith(
+        originalAssignee:
+            existingTask.originalAssignee ?? existingTask.assignedTo,
+      );
       await assignedTasksSheet.values
-          .insertRow(rowIndex, _assignedTaskToRow(task));
+          .insertRow(rowIndex, _assignedTaskToRow(updatedTask));
     }
   }
 
@@ -151,18 +172,15 @@ class TaskService {
             originalAssignee: assignedRoommate,
           );
           assignedTasks.add(assignedTask);
+          await addAssignedTask(assignedTask);
         }
       }
 
       await _saveAssignmentOrder();
 
-      for (final task in assignedTasks) {
-        await addAssignedTask(task);
-      }
-
       return assignedTasks;
     } catch (e) {
-      Exception('Error generating weekly tasks: $e');
+      print('Error generating weekly tasks: $e');
       return [];
     }
   }
@@ -225,22 +243,42 @@ class TaskService {
     final task = (await loadAssignedTasks()).firstWhere((t) => t.id == taskId);
     final originalAssignee = task.assignedTo;
 
-    task.assignedTo = newAssignee;
-    await updateAssignedTask(task);
+    final updatedTask = task.copyWith(
+      assignedTo: newAssignee,
+      originalAssignee: task.originalAssignee ?? originalAssignee,
+    );
+
+    await updateAssignedTask(updatedTask);
+
+    // Update assignment order only for template-based tasks
+    if (updatedTask.templateId != null) {
+      _assignmentOrder.updateAssignment(updatedTask.name, newAssignee);
+      await _saveAssignmentOrder();
+    }
 
     final tasksToSwap = await loadAssignedTasks();
     Task? taskToSwapBack;
     try {
       taskToSwapBack = tasksToSwap.firstWhere(
-        (t) => t.assignedTo == newAssignee && t.id != taskId,
+        (t) =>
+            t.assignedTo == newAssignee &&
+            t.id != taskId &&
+            t.templateId != null,
       );
     } catch (e) {
       // No task found to swap back
     }
 
     if (taskToSwapBack != null) {
-      taskToSwapBack.assignedTo = originalAssignee;
-      await updateAssignedTask(taskToSwapBack);
+      final swappedBackTask = taskToSwapBack.copyWith(
+        assignedTo: originalAssignee,
+        originalAssignee:
+            taskToSwapBack.originalAssignee ?? taskToSwapBack.assignedTo,
+      );
+      await updateAssignedTask(swappedBackTask);
+      _assignmentOrder.updateAssignment(
+          swappedBackTask.name, originalAssignee!,);
+      await _saveAssignmentOrder();
     }
   }
 
@@ -355,7 +393,7 @@ class TaskService {
       startDate: _parseExcelDate(row[5]),
       endDate: _parseExcelDate(row[6]),
       status: _parseStatus(row[7]),
-      originalAssignee: row[8],
+      originalAssignee: row[8].isNotEmpty ? row[8] : row[4],
     );
   }
 
@@ -377,7 +415,7 @@ class TaskService {
       task.startDate?.toIso8601String() ?? '',
       task.endDate?.toIso8601String() ?? '',
       task.status.toString().split('.').last,
-      task.originalAssignee ?? '',
+      task.originalAssignee ?? task.assignedTo ?? '',
     ];
   }
 

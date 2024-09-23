@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:roomie_tasks/app/pages/stats_page.dart';
 import 'package:roomie_tasks/app/providers/providers.dart';
 import 'package:roomie_tasks/app/providers/theme_provider.dart';
 import 'package:roomie_tasks/app/services/onboarding_service.dart';
@@ -90,6 +91,15 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          title: const Text('Task Statistics'),
+          trailing: const Icon(Icons.bar_chart),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const StatsPage()),
+          ),
+        ),
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           title: const Text('Reset Onboarding'),
           trailing: const Icon(Icons.refresh),
           onTap: _resetOnboarding,
@@ -133,8 +143,11 @@ class _SettingsPageState extends State<SettingsPage> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           title: const Text('License'),
           trailing: const Icon(Icons.open_in_new),
-          onTap: () => _launchInBrowser(Uri.parse(
-              'https://github.com/irangareddy/roomie_tasks/blob/main/LICENSE',),),
+          onTap: () => _launchInBrowser(
+            Uri.parse(
+              'https://github.com/irangareddy/roomie_tasks/blob/main/LICENSE',
+            ),
+          ),
         ),
         const Divider(
           thickness: 0.1,

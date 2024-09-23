@@ -22,6 +22,8 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
 
   Future<bool> isSetupComplete() async {
     final credentials = _storageService.get(StorageKey.credentials) as String?;
+        _spreadsheetId =
+        _storageService.get(StorageKey.spreadsheetId) as String? ?? '';
     return credentials != null && _spreadsheetId.isNotEmpty && _isConnected;
   }
 
@@ -36,11 +38,13 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
   }
 
   Future<void> setCredentials(File file) async {
-    final contents = await file.readAsString();
-    debugPrint(contents);
-    debugPrint(_spreadsheetId);
-    await _storageService.set(StorageKey.credentials, contents);
-    await _initializeGSheets(contents, _spreadsheetId);
+    try {
+      final contents = await file.readAsString();
+      await _storageService.set(StorageKey.credentials, contents);
+      await _initializeGSheets(contents, _spreadsheetId);
+    } catch (e) {
+      Exception('Error reading credentials file: $e'); // Add this line
+    }
   }
 
   Future<void> setSpreadsheetId(String id) async {
@@ -67,11 +71,11 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
 
   Future<void> connect() async {
     final credentials = _storageService.get(StorageKey.credentials) as String?;
-    debugPrint(credentials);
+    debugPrint('Stored credentials: $credentials'); // Add this line
     if (credentials != null) {
       await _initializeGSheets(credentials, _spreadsheetId);
     } else {
-      debugPrint('Unable to connect');
+      debugPrint('Unable to connect: Credentials not found');
       throw Exception('Credentials not found');
     }
   }

@@ -43,11 +43,25 @@ class TaskProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> addAssignedTask(Task task) async {
+    final updatedTask = task.copyWith(
+      originalAssignee: task.assignedTo,
+      templateId: task.templateId ?? ServiceUtils.generateUniqueId(),
+    );
+    await _sheetsService.taskService.addAssignedTask(updatedTask);
+    _assignedTasks.add(updatedTask);
+    notifyListeners();
+  }
+
   Future<void> updateAssignedTask(Task task) async {
-    await _sheetsService.taskService.updateAssignedTask(task);
-    final index = _assignedTasks.indexWhere((t) => t.id == task.id);
+    final existingTask = _assignedTasks.firstWhere((t) => t.id == task.id);
+    final updatedTask = task.copyWith(
+        originalAssignee:
+            existingTask.originalAssignee ?? existingTask.assignedTo,);
+    await _sheetsService.taskService.updateAssignedTask(updatedTask);
+    final index = _assignedTasks.indexWhere((t) => t.id == updatedTask.id);
     if (index != -1) {
-      _assignedTasks[index] = task;
+      _assignedTasks[index] = updatedTask;
       notifyListeners();
     }
   }
@@ -69,27 +83,17 @@ class TaskProvider with ChangeNotifier {
   }
 
   Future<void> swapTask(String taskId, String newAssignee) async {
-    final taskIndex = _assignedTasks.indexWhere((t) => t.id == taskId);
-    if (taskIndex != -1) {
-      final task = _assignedTasks[taskIndex];
-      final updatedTask = Task(
-        id: task.id,
-        templateId: task.templateId,
-        name: task.name,
-        frequency: task.frequency,
-        startDate: task.startDate,
-        endDate: task.endDate,
-        assignedTo: newAssignee,
-        status: task.status,
-        originalAssignee: task.originalAssignee ?? task.assignedTo,
-      );
-      await updateAssignedTask(updatedTask);
-    }
+    await _sheetsService.taskService.swapTask(taskId, newAssignee);
+    await loadAssignedTasks(); // Reload tasks to reflect changes
   }
 
   Future<void> wipeOffAssignedTasks() async {
     await _sheetsService.taskService.wipeOffAssignedTasks();
     _assignedTasks.clear();
     notifyListeners();
+  }
+
+  Future<Map<String, dynamic>> generateFairnessReport() async {
+    return _sheetsService.taskService.generateFairnessReport();
   }
 }

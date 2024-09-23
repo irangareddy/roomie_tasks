@@ -1,39 +1,47 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  static const Color uberBlue = Color(0xFF276EF1);
+  static const Color uberBlack = Color(0xFF000000);
+  static const Color uberWhite = Color(0xFFFFFFFF);
+  static const Color uberGrey = Color(0xFFEEEEEE);
+  static const Color uberDarkGrey = Color(0xFF333333);
+
   static ThemeData lightTheme() {
     return ThemeData(
       brightness: Brightness.light,
-      primaryColor: Colors.black,
-      scaffoldBackgroundColor: Colors.white,
+      primaryColor: uberBlack,
+      scaffoldBackgroundColor: uberWhite,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: uberWhite,
+        foregroundColor: uberBlack,
         elevation: 0,
       ),
-      colorScheme: ColorScheme.light(
-        primary: Colors.black,
-        secondary: Colors.green[700]!,
-        surface: Colors.grey[100]!,
-        onSecondary: Colors.white,
+      colorScheme: const ColorScheme.light(
+        primary: uberBlack,
+        secondary: uberBlue,
+        surface: uberGrey,
+        onSecondary: uberWhite,
       ),
       textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: Colors.black),
-        bodyMedium: TextStyle(color: Colors.black87),
-        titleLarge: TextStyle(color: Colors.black),
+        bodyLarge: TextStyle(color: uberBlack),
+        bodyMedium: TextStyle(color: uberBlack),
+        titleLarge: TextStyle(color: uberBlack),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
+          backgroundColor: uberBlack,
+          foregroundColor: uberWhite,
         ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        focusedBorder: const OutlineInputBorder(),
-        labelStyle: const TextStyle(color: Colors.black54),
+      cardTheme: CardTheme(
+        color: uberWhite,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: uberBlue,
+        linearTrackColor: uberGrey,
       ),
       useMaterial3: true,
     );
@@ -42,38 +50,38 @@ class AppTheme {
   static ThemeData darkTheme() {
     return ThemeData(
       brightness: Brightness.dark,
-      primaryColor: Colors.white,
-      scaffoldBackgroundColor: Colors.black,
+      primaryColor: uberWhite,
+      scaffoldBackgroundColor: uberBlack,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: uberBlack,
+        foregroundColor: uberWhite,
         elevation: 0,
       ),
-      colorScheme: ColorScheme.dark(
-        primary: Colors.white,
-        secondary: Colors.green[700]!,
-        surface: Colors.grey[900]!,
-        onSecondary: Colors.white,
+      colorScheme: const ColorScheme.dark(
+        primary: uberWhite,
+        secondary: uberBlue,
+        surface: uberDarkGrey,
+        onSecondary: uberWhite,
       ),
       textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: Colors.white),
-        bodyMedium: TextStyle(color: Colors.white70),
-        titleLarge: TextStyle(color: Colors.white),
+        bodyLarge: TextStyle(color: uberWhite),
+        bodyMedium: TextStyle(color: uberWhite),
+        titleLarge: TextStyle(color: uberWhite),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
+          backgroundColor: uberWhite,
+          foregroundColor: uberBlack,
         ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey[700]!),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white),
-        ),
-        labelStyle: const TextStyle(color: Colors.white70),
+      cardTheme: CardTheme(
+        color: uberDarkGrey,
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: uberBlue,
+        linearTrackColor: uberDarkGrey,
       ),
       useMaterial3: true,
     );
