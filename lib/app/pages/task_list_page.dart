@@ -147,39 +147,72 @@ class _TaskListPageState extends State<TaskListPage> {
                       itemBuilder: (context, index) {
                         final task = tasks[index];
                         return Card(
-                          child: ListTile(
-                            title: Text(task.name),
-                            subtitle: Text(
-                              'Assigned to: ${task.assignedTo ?? 'Unassigned'}\n'
-                              'Due: ${task.endDate?.toString().split(' ')[0] ?? 'Not set'}',
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 16),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          color: Theme.of(context).cardColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                DropdownButton<TaskStatus>(
-                                  value: task.status,
-                                  onChanged: (TaskStatus? newValue) {
-                                    if (newValue != null) {
-                                      _updateTaskStatus(task, newValue);
-                                    }
-                                  },
-                                  items: TaskStatus.values
-                                      .map<DropdownMenuItem<TaskStatus>>(
-                                          (TaskStatus value) {
-                                    return DropdownMenuItem<TaskStatus>(
-                                      value: value,
-                                      child: Text(
-                                          value.toString().split('.').last,),
-                                    );
-                                  }).toList(),
+                                Text(
+                                  task.name,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => _showTaskModal(task: task),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Assigned to: ${task.assignedTo ?? 'Unassigned'}',
+                                  style: Theme.of(context).textTheme.bodyLarge,
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () => _deleteTask(task),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Due: ${task.endDate?.toString().split(' ')[0] ?? 'Not set'}',
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    DropdownButton<TaskStatus>(
+                                      value: task.status,
+                                      onChanged: (TaskStatus? newValue) {
+                                        if (newValue != null) {
+                                          _updateTaskStatus(task, newValue);
+                                        }
+                                      },
+                                      items: TaskStatus.values
+                                          .map<DropdownMenuItem<TaskStatus>>(
+                                              (TaskStatus value) {
+                                        return DropdownMenuItem<TaskStatus>(
+                                          value: value,
+                                          child: Text(
+                                            _mapTaskStatus(value),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit),
+                                          onPressed: () =>
+                                              _showTaskModal(task: task),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete),
+                                          onPressed: () => _deleteTask(task),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -241,5 +274,15 @@ class _TaskListPageState extends State<TaskListPage> {
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       await taskProvider.deleteAssignedTask(task.id);
     }
+  }
+
+  String _mapTaskStatus(TaskStatus status) {
+    return status.toString().split('.').last.capitalize();
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return this[0].toUpperCase() + substring(1);
   }
 }
