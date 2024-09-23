@@ -3,28 +3,19 @@ import 'package:gsheets/gsheets.dart';
 import 'package:roomie_tasks/app/services/services.dart';
 
 class GoogleSheetsService {
-  late GSheets? _gsheets;
-  late Spreadsheet? _spreadsheet;
+  late GSheets _gsheets;
+  late Spreadsheet _spreadsheet;
   late RoommateService roommateService;
   late TaskService taskService;
-  late Worksheet? _metadataSheet;
+  late Worksheet _metadataSheet;
 
   Future<Spreadsheet> initialize(
-    String? credentials,
-    String? spreadsheetId,
-  ) async {
-    if (credentials == null || spreadsheetId == null) {
-      throw Exception('Credentials or spreadsheet ID not found');
-    }
-
-    debugPrint(credentials);
-    debugPrint(spreadsheetId);
-
+      String credentials, String spreadsheetId,) async {
     _gsheets = GSheets(credentials);
     try {
-      _spreadsheet = await _gsheets!.spreadsheet(spreadsheetId);
+      _spreadsheet = await _gsheets.spreadsheet(spreadsheetId);
       await _initializeWorksheets();
-      return _spreadsheet!;
+      return _spreadsheet;
     } catch (e) {
       debugPrint('Error initializing GSheets: $e');
       throw Exception('Failed to initialize Google Sheets');
@@ -32,25 +23,27 @@ class GoogleSheetsService {
   }
 
   Future<void> _initializeWorksheets() async {
-    final tasksSheet =
-        await ServiceUtils.getOrCreateWorksheet(_spreadsheet!, 'Tasks');
+    final taskTemplatesSheet =
+        await ServiceUtils.getOrCreateWorksheet(_spreadsheet, 'TaskTemplates');
+    final assignedTasksSheet =
+        await ServiceUtils.getOrCreateWorksheet(_spreadsheet, 'AssignedTasks');
     final roommatesSheet =
-        await ServiceUtils.getOrCreateWorksheet(_spreadsheet!, 'Roommates');
+        await ServiceUtils.getOrCreateWorksheet(_spreadsheet, 'Roommates');
     _metadataSheet =
-        await ServiceUtils.getOrCreateWorksheet(_spreadsheet!, 'Metadata');
+        await ServiceUtils.getOrCreateWorksheet(_spreadsheet, 'Metadata');
 
     roommateService = RoommateService(roommatesSheet);
-    taskService = TaskService(tasksSheet);
+    taskService = TaskService(taskTemplatesSheet, assignedTasksSheet, this);
 
-    await roommateService.initialize();
-    await taskService.initialize();
-    await ServiceUtils.ensureHeaders(_metadataSheet!, ['Key', 'Value']);
+    await roommateService.initialize(taskService);
+    await taskService.initialize(roommateService);
+    await ServiceUtils.ensureHeaders(_metadataSheet, ['Key', 'Value']);
   }
 
   // Metadata operations
 
   Future<String?> getMetadata(String key) async {
-    final rows = await _metadataSheet!.values.allRows();
+    final rows = await _metadataSheet.values.allRows();
     final rowIndex = rows.indexWhere((row) => row[0] == key);
     if (rowIndex != -1) {
       return rows[rowIndex][1];
@@ -59,12 +52,12 @@ class GoogleSheetsService {
   }
 
   Future<void> setMetadata(String key, String value) async {
-    final rows = await _metadataSheet!.values.allRows();
+    final rows = await _metadataSheet.values.allRows();
     final rowIndex = rows.indexWhere((row) => row[0] == key);
     if (rowIndex != -1) {
-      await _metadataSheet!.values.insertRow(rowIndex + 1, [key, value]);
+      await _metadataSheet.values.insertRow(rowIndex + 1, [key, value]);
     } else {
-      await _metadataSheet!.values.appendRow([key, value]);
+      await _metadataSheet.values.appendRow([key, value]);
     }
   }
 }

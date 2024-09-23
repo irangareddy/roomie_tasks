@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:roomie_tasks/app/models/roommate.dart';
 import 'package:roomie_tasks/app/services/service_utils.dart';
+import 'package:roomie_tasks/app/services/task_service.dart';
 
 class RoommateService {
   RoommateService(this._roommatesSheet);
   final Worksheet _roommatesSheet;
+  late TaskService _taskService;
 
-  Future<void> initialize() async {
+  Future<void> initialize(TaskService taskService) async {
+    _taskService = taskService;
     await ServiceUtils.ensureHeaders(_roommatesSheet, [
       'Id',
       'Name',
@@ -43,6 +46,7 @@ class RoommateService {
     }
 
     await _roommatesSheet.values.appendRow(_roommateToRow(roommate));
+    await _taskService.reviseSchedule();
     return true;
   }
 
@@ -57,6 +61,7 @@ class RoommateService {
         _roommateToRow(roommate),
       );
     }
+    await _taskService.reviseSchedule();
   }
 
   Future<void> deleteRoommate(String id) async {
@@ -64,6 +69,7 @@ class RoommateService {
     if (rowIndex != null) {
       await _roommatesSheet.deleteRow(rowIndex);
     }
+    await _taskService.reviseSchedule();
   }
 
   List<String> _roommateToRow(Roommate roommate) {

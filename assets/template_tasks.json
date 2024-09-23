@@ -1,0 +1,74 @@
+{
+  "templateTasks": [
+    {
+      "id": 1,
+      "name": "Clean Kitchen",
+      "emoji": "🍽️"
+    },
+    {
+      "id": 2,
+      "name": "Vacuum Living Room",
+      "emoji": "🧹"
+    },
+    {
+      "id": 3,
+      "name": "Take out Trash",
+      "emoji": "🗑️"
+    },
+    {
+      "id": 4,
+      "name": "Wash Dishes",
+      "emoji": "🧼"
+    },
+    {
+      "id": 5,
+      "name": "Laundry",
+      "emoji": "🧺"
+    },
+    {
+      "id": 6,
+      "name": "Mop Floors",
+      "emoji": "🧽"
+    },
+    {
+      "id": 7,
+      "name": "Grocery Shopping",
+      "emoji": "🛒"
+    },
+    {
+      "id": 8,
+      "name": "Clean Bathroom",
+      "emoji": "🚿"
+    },
+    {
+      "id": 9,
+      "name": "Cook Dinner",
+      "emoji": "🍳"
+    },
+    {
+      "id": 10,
+      "name": "Water Plants",
+      "emoji": "🌿"
+    },
+    {
+      "id": 11,
+      "name": "Dust Furniture",
+      "emoji": "🧴"
+    },
+    {
+      "id": 12,
+      "name": "Organize Shared Items",
+      "emoji": "📦"
+    },
+    {
+      "id": 13,
+      "name": "Clean Refrigerator",
+      "emoji": "🧊"
+    },
+    {
+      "id": 14,
+      "name": "Wipe Down Counters",
+      "emoji": "🧽"
+    }
+  ]
+}

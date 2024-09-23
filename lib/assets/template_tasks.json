@@ -1,0 +1,145 @@
+{
+    "templateTasks": [
+      {
+        "id": 1,
+        "name": "Clean Kitchen",
+        "emoji": "🍽️"
+      },
+      {
+        "id": 2,
+        "name": "Vacuum Living Room",
+        "emoji": "🧹"
+      },
+      {
+        "id": 3,
+        "name": "Take out Trash",
+        "emoji": "🗑️"
+      },
+      {
+        "id": 4,
+        "name": "Wash Dishes",
+        "emoji": "🧼"
+      },
+      {
+        "id": 5,
+        "name": "Laundry",
+        "emoji": "🧺"
+      },
+      {
+        "id": 6,
+        "name": "Mop Floors",
+        "emoji": "🧽"
+      },
+      {
+        "id": 7,
+        "name": "Grocery Shopping",
+        "emoji": "🛒"
+      },
+      {
+        "id": 8,
+        "name": "Clean Bathroom",
+        "emoji": "🚿"
+      },
+      {
+        "id": 9,
+        "name": "Cook Dinner",
+        "emoji": "🍳"
+      },
+      {
+        "id": 10,
+        "name": "Water Plants",
+        "emoji": "🌿"
+      },
+      {
+        "id": 11,
+        "name": "Dust Furniture",
+        "emoji": "🧴"
+      },
+      {
+        "id": 12,
+        "name": "Organize Shared Items",
+        "emoji": "📦"
+      },
+      {
+        "id": 13,
+        "name": "Clean Refrigerator",
+        "emoji": "🧊"
+      },
+      {
+        "id": 14,
+        "name": "Wipe Down Counters",
+        "emoji": "🧽"
+      },
+      {
+        "id": 15,
+        "name": "Wash Bathroom Towels",
+        "emoji": "🛁"
+      },
+      {
+        "id": 16,
+        "name": "Replace Toilet Paper",
+        "emoji": "🧻"
+      },
+      {
+        "id": 17,
+        "name": "Defrost Freezer",
+        "emoji": "❄️"
+      },
+      {
+        "id": 18,
+        "name": "Reorganize Pantry",
+        "emoji": "🥫"
+      },
+      {
+        "id": 19,
+        "name": "Change Bed Sheets",
+        "emoji": "🛏️"
+      },
+      {
+        "id": 20,
+        "name": "Clean Microwave",
+        "emoji": "📡"
+      },
+      {
+        "id": 21,
+        "name": "Clean Stove Top",
+        "emoji": "🔥"
+      },
+      {
+        "id": 22,
+        "name": "Meal Prep for the Week",
+        "emoji": "🍱"
+      },
+      {
+        "id": 23,
+        "name": "Study Group Organization",
+        "emoji": "📚"
+      },
+      {
+        "id": 24,
+        "name": "Pay Utility Bills",
+        "emoji": "💡"
+      },
+      {
+        "id": 25,
+        "name": "Clean Balcony or Patio",
+        "emoji": "🌞"
+      },
+      {
+        "id": 26,
+        "name": "Host a House Meeting",
+        "emoji": "🗣️"
+      },
+      {
+        "id": 27,
+        "name": "Refill Cleaning Supplies",
+        "emoji": "🧴"
+      },
+      {
+        "id": 28,
+        "name": "Sort and Recycle Bottles",
+        "emoji": "♻️"
+      }
+    ]
+  }
+  

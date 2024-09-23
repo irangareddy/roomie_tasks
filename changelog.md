@@ -8,7 +8,7 @@
   - Created `GoogleSheetsService` for handling Google Sheets operations
   - Added `GoogleSheetsSetupPage` for user configuration of Google Sheets
   - Implemented credential upload and spreadsheet ID input
-- Created `Task` model with JSON serialization and status enum
+- Created `Task` model with JSON serialization, status enum, and `originalAssignee` field
 - Implemented `Roommate` model with JSON serialization
 - Added `StorageService` abstract class and `HiveStorageService` implementation for local storage
 - Created `TaskProvider` and `RoommateProvider` for state management
@@ -21,6 +21,16 @@
 - Created `RoommateService` and `TaskService` for handling roommate and task operations
 - Added `ServiceUtils` for common utility functions used across services
 - Implemented automatic loading of saved Google Sheets configuration
+- Implemented task management features in `TaskService`:
+  - Added `generateWeeklyTasks` method
+  - Implemented `clearFutureTasks` method
+  - Created `reviseSchedule` method for updating task assignments
+  - Added `swapTask` functionality
+  - Implemented `wipeOffAssignedTasks` method
+- Created `AssignmentOrder` class for managing task assignment order
+- Added `periodicNormalization` method for balancing task assignments
+- Implemented `generateFairnessReport` method for analyzing task distribution
+- Added `_calculateOverallBalance` method for quantifying fairness
 
 ### Changed
 
@@ -35,13 +45,18 @@
 - Refactored `GoogleSheetsSetupProvider` to determine initial setup status based on stored credentials and spreadsheet ID
 - Updated `AddRoommatesPage` to use a modal bottom sheet for adding new roommates
 - Modified `RoommateProvider` to work with the new `RoommateService`
+- Moved `reviseSchedule` method from `RoommateService` to `TaskService`
+- Updated `TaskProvider` to use new `TaskService` methods
+- Modified `Task` model to include `isSwapped` getter
+- Refactored `GoogleSheetsService` to properly initialize `TaskService` and `RoommateService`
+- Updated `AppRoutes` to include redirection logic for setup completion
 
 ### Fixed
 
-- Addressed potential null safety issues in `GoogleSheetsService`
-- Improved error handling in Google Sheets connection process
+- Addressed potential null safety issues in `GoogleSheetsService` and `GoogleSheetsSetupProvider`
+- Improved error handling in Google Sheets connection process and `TaskService` methods
 - Fixed issue with duplicate roommate creation
 
 ### Removed
 
-- N/A (No specific removals noted in this version)
+- Removed redundant task assignment logic from `RoommateService`

@@ -20,6 +20,6 @@ class DependencyManager {
         GoogleSheetsSetupProvider(sl()),
       )
       ..registerSingleton<RoommateProvider>(RoommateProvider(sl()))
-      ..registerSingleton<TaskProvider>(TaskProvider());
+      ..registerSingleton<TaskProvider>(TaskProvider(sl()));
   }
 }

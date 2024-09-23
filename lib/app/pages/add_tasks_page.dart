@@ -1,86 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gsheets/gsheets.dart';
+import 'package:provider/provider.dart';
+import 'package:roomie_tasks/app/models/task.dart';
+import 'package:roomie_tasks/app/providers/tasks_provider.dart';
 import 'package:roomie_tasks/config/routes/routes.dart';
 
 class AddTasksPage extends StatefulWidget {
-  const AddTasksPage({required this.spreadsheet, super.key});
-  final Spreadsheet spreadsheet;
+  const AddTasksPage({super.key});
 
   @override
   State<AddTasksPage> createState() => _AddTasksPageState();
 }
 
 class _AddTasksPageState extends State<AddTasksPage> {
-  List<Map<String, dynamic>> tasks = [];
   final TextEditingController _taskNameController = TextEditingController();
-  final TextEditingController _frequencyController = TextEditingController();
-  Worksheet? _worksheet;
+  TaskFrequency _frequency = TaskFrequency.weekly;
 
   @override
   void initState() {
     super.initState();
-    _initWorksheet();
-  }
-
-  Future<void> _initWorksheet() async {
-    _worksheet = widget.spreadsheet.worksheetByTitle('Tasks');
-    _worksheet ??= await widget.spreadsheet.addWorksheet('Tasks');
-    await _loadTasks();
-  }
-
-  Future<void> _loadTasks() async {
-    if (_worksheet == null) return;
-    final values = await _worksheet!.values.allRows(fromRow: 2);
-    setState(() {
-      tasks = values
-          .map(
-            (row) => {
-              'name': row[0],
-              'frequency': int.parse(row[1]),
-            },
-          )
-          .toList();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TaskProvider>().loadTaskTemplates();
     });
   }
 
-  Future<void> _addTask() async {
-    if (_taskNameController.text.isNotEmpty &&
-        _frequencyController.text.isNotEmpty &&
-        _worksheet != null) {
-      final newTask = {
-        'name': _taskNameController.text,
-        'frequency': int.parse(_frequencyController.text),
-      };
-      await _worksheet!.values
-          .appendRow([newTask['name'], newTask['frequency'].toString()]);
-      setState(() {
-        tasks.add(newTask);
-        _taskNameController.clear();
-        _frequencyController.clear();
-      });
+  Future<void> _addTaskTemplate() async {
+    if (_taskNameController.text.isNotEmpty) {
+      final task = Task(
+        name: _taskNameController.text,
+        frequency: _frequency,
+      );
+      await context.read<TaskProvider>().addTaskTemplate(task);
+      _taskNameController.clear();
     }
   }
 
-  Future<void> _removeTask(int index) async {
-    if (_worksheet != null) {
-      await _worksheet!.deleteRow(
-        index + 2,
-      ); // +2 because sheet is 1-indexed and we have a header row
-      setState(() {
-        tasks.removeAt(index);
-      });
-    }
-  }
+  Future<void> _editTaskTemplate(Task task) async {
+    _taskNameController.text = task.name;
+    _frequency = task.frequency;
 
-  Future<void> _editTask(int index) async {
-    _taskNameController.text = tasks[index]['name'] as String;
-    _frequencyController.text = tasks[index]['frequency'].toString();
-
-    final result = await showDialog<Map<String, dynamic>>(
+    final result = await showDialog<Task>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Task'),
+        title: const Text('Edit Task Template'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -88,11 +50,21 @@ class _AddTasksPageState extends State<AddTasksPage> {
               controller: _taskNameController,
               decoration: const InputDecoration(labelText: 'Task Name'),
             ),
-            TextField(
-              controller: _frequencyController,
-              decoration:
-                  const InputDecoration(labelText: 'Frequency (in days)'),
-              keyboardType: TextInputType.number,
+            DropdownButton<TaskFrequency>(
+              value: _frequency,
+              onChanged: (TaskFrequency? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _frequency = newValue;
+                  });
+                }
+              },
+              items: TaskFrequency.values.map((TaskFrequency frequency) {
+                return DropdownMenuItem<TaskFrequency>(
+                  value: frequency,
+                  child: Text(frequency.name),
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -103,23 +75,21 @@ class _AddTasksPageState extends State<AddTasksPage> {
           ),
           TextButton(
             child: const Text('Save'),
-            onPressed: () => Navigator.pop(context, {
-              'name': _taskNameController.text,
-              'frequency': int.parse(_frequencyController.text),
-            }),
+            onPressed: () => Navigator.pop(
+              context,
+              Task(
+                id: task.id,
+                name: _taskNameController.text,
+                frequency: _frequency,
+              ),
+            ),
           ),
         ],
       ),
     );
 
     if (result != null) {
-      await _worksheet!.values.insertRow(
-        index + 2,
-        [result['name'], result['frequency'].toString()],
-      );
-      setState(() {
-        tasks[index] = result;
-      });
+      await context.read<TaskProvider>().updateTaskTemplate(result);
     }
   }
 
@@ -127,7 +97,7 @@ class _AddTasksPageState extends State<AddTasksPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Tasks'),
+        title: const Text('Add Task Templates'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -141,51 +111,60 @@ class _AddTasksPageState extends State<AddTasksPage> {
               ),
             ),
             const SizedBox(height: 10),
-            TextField(
-              controller: _frequencyController,
-              decoration: const InputDecoration(
-                labelText: 'Frequency (in days)',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
+            DropdownButton<TaskFrequency>(
+              value: _frequency,
+              onChanged: (TaskFrequency? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _frequency = newValue;
+                  });
+                }
+              },
+              items: TaskFrequency.values.map((TaskFrequency frequency) {
+                return DropdownMenuItem<TaskFrequency>(
+                  value: frequency,
+                  child: Text(frequency.name),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
-              onPressed: _addTask,
-              child: const Text('Add Task'),
+              onPressed: _addTaskTemplate,
+              child: const Text('Add Task Template'),
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(tasks[index]['name'] as String),
-                    subtitle: Text('Every ${tasks[index]['frequency']} days'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => _editTask(index),
+              child: Consumer<TaskProvider>(
+                builder: (context, taskProvider, child) {
+                  return ListView.builder(
+                    itemCount: taskProvider.taskTemplates.length,
+                    itemBuilder: (context, index) {
+                      final task = taskProvider.taskTemplates[index];
+                      return ListTile(
+                        title: Text(task.name),
+                        subtitle: Text('Frequency: ${task.frequency.name}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _editTaskTemplate(task),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () =>
+                                  taskProvider.deleteTaskTemplate(task.id),
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _removeTask(index),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
               ),
             ),
             ElevatedButton(
-              onPressed: tasks.isNotEmpty
-                  ? () => context.go(
-                        AppRoutes.addRoommates,
-                        extra: widget.spreadsheet,
-                      )
-                  : null,
+              onPressed: () => context.go(AppRoutes.taskList),
               child: const Text('Next: View Task List'),
             ),
           ],
