@@ -1,6 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:roomie_tasks/app/models/task.dart';
 import 'package:roomie_tasks/app/pages/task_modal_sheet.dart';
@@ -17,7 +19,6 @@ class TaskListPage extends StatefulWidget {
 
 class _TaskListPageState extends State<TaskListPage> {
   bool _isLoading = true;
-  TaskStatus? _currentFilter;
 
   @override
   void initState() {
@@ -149,163 +150,31 @@ class _TaskListPageState extends State<TaskListPage> {
                           );
                         }
 
-                        final filteredTasks = _currentFilter == null
-                            ? tasks
-                            : tasks
-                                .where((task) => task.status == _currentFilter)
-                                .toList();
+                        final groupedTasks = _groupTasksByDate(tasks);
+                        final sortedDates = groupedTasks.keys.toList()..sort();
 
-                        return Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  const Text('Filter: '),
-                                  DropdownButton<TaskStatus?>(
-                                    value: _currentFilter,
-                                    items: [
-                                      const DropdownMenuItem<TaskStatus?>(
-                                        child: Text('All'),
-                                      ),
-                                      ...TaskStatus.values.map((status) {
-                                        return DropdownMenuItem<TaskStatus?>(
-                                          value: status,
-                                          child: Text(_mapTaskStatus(status)),
-                                        );
-                                      }),
-                                    ],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _currentFilter = value;
-                                      });
-                                    },
+                        return ListView.builder(
+                          itemCount: sortedDates.length,
+                          itemBuilder: (context, index) {
+                            final date = sortedDates[index];
+                            final tasksForDate = groupedTasks[date]!;
+                            final isOverdue = date.isBefore(DateTime.now());
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                    _formatDate(date),
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      color: isOverdue ? Colors.red : null,
+                                    ),
                                   ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: filteredTasks.length,
-                                itemBuilder: (context, index) {
-                                  final task = filteredTasks[index];
-                                  return Card(
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                      horizontal: 16,
-                                    ),
-                                    elevation: 4,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    color: theme.colorScheme.surface,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            task.name,
-                                            style: theme.textTheme.titleLarge
-                                                ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color:
-                                                  theme.colorScheme.onSurface,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            'Assigned to: ${task.assignedTo ?? 'Unassigned'}',
-                                            style: theme.textTheme.bodyLarge
-                                                ?.copyWith(
-                                              color: theme.colorScheme.onSurface
-                                                  .withOpacity(0.8),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Due: ${task.endDate?.toString().split(' ')[0] ?? 'Not set'}',
-                                            style: theme.textTheme.bodyLarge
-                                                ?.copyWith(
-                                              color: theme.colorScheme.onSurface
-                                                  .withOpacity(0.8),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              DropdownButton<TaskStatus>(
-                                                value: task.status,
-                                                onChanged:
-                                                    (TaskStatus? newValue) {
-                                                  if (newValue != null) {
-                                                    _updateTaskStatus(
-                                                      task,
-                                                      newValue,
-                                                    );
-                                                  }
-                                                },
-                                                items: TaskStatus.values.map<
-                                                        DropdownMenuItem<
-                                                            TaskStatus>>(
-                                                    (TaskStatus value) {
-                                                  return DropdownMenuItem<
-                                                      TaskStatus>(
-                                                    value: value,
-                                                    child: Text(
-                                                      _mapTaskStatus(value),
-                                                      style: TextStyle(
-                                                        color: theme.colorScheme
-                                                            .onSurface,
-                                                      ),
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                                dropdownColor:
-                                                    theme.colorScheme.surface,
-                                                icon: Icon(
-                                                  Icons.arrow_drop_down,
-                                                  color: theme
-                                                      .colorScheme.onSurface,
-                                                ),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  IconButton(
-                                                    icon: Icon(
-                                                      Icons.edit,
-                                                      color: theme
-                                                          .colorScheme.primary,
-                                                    ),
-                                                    onPressed: () =>
-                                                        _showTaskModal(
-                                                            task: task),
-                                                  ),
-                                                  IconButton(
-                                                    icon: Icon(
-                                                      Icons.delete,
-                                                      color: theme
-                                                          .colorScheme.error,
-                                                    ),
-                                                    onPressed: () =>
-                                                        _deleteTask(task),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
+                                ),
+                                ...tasksForDate.map((task) => _buildTaskCard(task, theme)),
+                              ],
+                            );
+                          },
                         );
                       },
                     ),
@@ -318,6 +187,86 @@ class _TaskListPageState extends State<TaskListPage> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildTaskCard(Task task, ThemeData theme) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      color: theme.colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              task.name,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              task.assignedTo ?? 'Unassigned',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.8),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                DropdownButton<TaskStatus>(
+                  value: task.status,
+                  onChanged: (TaskStatus? newValue) {
+                    if (newValue != null) {
+                      _updateTaskStatus(task, newValue);
+                    }
+                  },
+                  items: TaskStatus.values.map<DropdownMenuItem<TaskStatus>>(
+                    (TaskStatus value) {
+                      return DropdownMenuItem<TaskStatus>(
+                        value: value,
+                        child: Text(
+                          _mapTaskStatus(value),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      );
+                    },
+                  ).toList(),
+                  dropdownColor: theme.colorScheme.surface,
+                  icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurface, size: 20),
+                  underline: Container(
+                    height: 1,
+                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.edit, color: theme.colorScheme.primary, size: 22),
+                      onPressed: () => _showTaskModal(task: task),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(Icons.delete, color: theme.colorScheme.error, size: 22),
+                      onPressed: () => _deleteTask(task),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -367,6 +316,27 @@ class _TaskListPageState extends State<TaskListPage> {
 
   String _mapTaskStatus(TaskStatus status) {
     return status.toString().split('.').last.capitalize();
+  }
+
+  Map<DateTime, List<Task>> _groupTasksByDate(List<Task> tasks) {
+    return groupBy(tasks, (Task task) {
+      final date = task.endDate ?? DateTime.now();
+      return DateTime(date.year, date.month, date.day);
+    });
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+
+    if (date == today) {
+      return 'Today, ${DateFormat('EEEE, MMM d, yyyy').format(date)}';
+    } else if (date == tomorrow) {
+      return 'Tomorrow, ${DateFormat('EEEE, MMM d, yyyy').format(date)}';
+    } else {
+      return DateFormat('EEEE, MMM d, yyyy').format(date);
+    }
   }
 }
 
