@@ -31,6 +31,10 @@
 - Added `periodicNormalization` method for balancing task assignments
 - Implemented `generateFairnessReport` method for analyzing task distribution
 - Added `_calculateOverallBalance` method for quantifying fairness
+- Enhanced `AddTasksPage` functionality:
+  - Implemented a modal bottom sheet for adding new task templates
+  - Added suggested tasks feature with emoji support
+  - Implemented task frequency selection in the add task form
 
 ### Changed
 
@@ -50,12 +54,19 @@
 - Modified `Task` model to include `isSwapped` getter
 - Refactored `GoogleSheetsService` to properly initialize `TaskService` and `RoommateService`
 - Updated `AppRoutes` to include redirection logic for setup completion
+- Updated `AddTasksPage` UI:
+  - Improved layout of task template list
+  - Added empty state message when no task templates exist
+  - Refactored task addition process to use a modal bottom sheet
 
 ### Fixed
 
 - Addressed potential null safety issues in `GoogleSheetsService` and `GoogleSheetsSetupProvider`
 - Improved error handling in Google Sheets connection process and `TaskService` methods
 - Fixed issue with duplicate roommate creation
+- Resolved issues with task template management in `AddTasksPage`:
+  - Fixed task template addition and deletion
+  - Improved error handling in task template operations
 
 ### Removed
 
