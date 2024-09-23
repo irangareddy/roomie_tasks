@@ -4,10 +4,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:roomie_tasks/app/pages/stats_page.dart';
 import 'package:roomie_tasks/app/providers/providers.dart';
-import 'package:roomie_tasks/app/providers/theme_provider.dart';
 import 'package:roomie_tasks/app/services/onboarding_service.dart';
+import 'package:roomie_tasks/config/config.dart';
 import 'package:roomie_tasks/config/routes/routes.dart';
 import 'package:roomie_tasks/dependency_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -93,10 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           title: const Text('Task Statistics'),
           trailing: const Icon(Icons.bar_chart),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const StatsPage()),
-          ),
+          onTap: () => context.push(AppRoutes.stats),
         ),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),

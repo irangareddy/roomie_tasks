@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:roomie_tasks/app/providers/providers.dart';
-import 'package:roomie_tasks/app/providers/theme_provider.dart';
 import 'package:roomie_tasks/app/services/services.dart';
 
 final sl = GetIt.instance;

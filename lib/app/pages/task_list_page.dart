@@ -4,12 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:roomie_tasks/app/models/task.dart';
-import 'package:roomie_tasks/app/pages/task_detail_page.dart';
-import 'package:roomie_tasks/app/pages/task_modal_sheet.dart';
+import 'package:roomie_tasks/app/models/models.dart';
+import 'package:roomie_tasks/app/pages/ui.dart';
 import 'package:roomie_tasks/app/providers/providers.dart';
-import 'package:roomie_tasks/app/providers/theme_provider.dart';
-import 'package:roomie_tasks/config/routes/routes.dart';
+import 'package:roomie_tasks/config/config.dart';
 
 class TaskListPage extends StatefulWidget {
   const TaskListPage({super.key});
@@ -132,17 +130,18 @@ class _TaskListPageState extends State<TaskListPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 SvgPicture.asset(
-                                  'assets/images/create_tasks.svg',
+                                  'assets/images/empty_tasks.svg',
                                   height: 300,
                                 ),
                                 const SizedBox(height: 20),
                                 Text(
-                                  'No Roomie Tasks available.',
+                                  'Chillin’! No Roomie Tasks Left!',
                                   style: theme.textTheme.headlineSmall,
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  'Tap the + button to add a new task.',
+                                  // ignore: lines_longer_than_80_chars
+                                  'Feeling the vibe? Smash that + to set up some tasks!',
                                   style: theme.textTheme.bodyLarge,
                                 ),
                                 const SizedBox(height: 200),
@@ -167,12 +166,14 @@ class _TaskListPageState extends State<TaskListPage> {
                                   padding: const EdgeInsets.all(8),
                                   child: Text(
                                     _formatDate(date),
-                                    style: theme.textTheme.titleMedium?.copyWith(
+                                    style:
+                                        theme.textTheme.titleMedium?.copyWith(
                                       color: isOverdue ? Colors.red : null,
                                     ),
                                   ),
                                 ),
-                                ...tasksForDate.map((task) => _buildTaskCard(task, theme)),
+                                ...tasksForDate
+                                    .map((task) => _buildTaskCard(task, theme)),
                               ],
                             );
                           },
@@ -191,81 +192,79 @@ class _TaskListPageState extends State<TaskListPage> {
     );
   }
 
-Widget _buildTaskCard(Task task, ThemeData theme) {
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-    elevation: 2,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    color: theme.colorScheme.surface,
-    child: InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => TaskDetailPage(task: task),
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              task.name,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
+  Widget _buildTaskCard(Task task, ThemeData theme) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      color: theme.colorScheme.surface,
+      child: InkWell(
+        onTap: () => context.push(AppRoutes.taskDetail, extra: task),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                task.name,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              task.assignedTo ?? 'Unassigned',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.8),
+              const SizedBox(height: 2),
+              Text(
+                task.assignedTo ?? 'Unassigned',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                DropdownButton<TaskStatus>(
-                  value: task.status,
-                  onChanged: (TaskStatus? newValue) {
-                    if (newValue != null) {
-                      _updateTaskStatus(task, newValue);
-                    }
-                  },
-                  items: TaskStatus.values.map<DropdownMenuItem<TaskStatus>>(
-                    (TaskStatus value) {
-                      return DropdownMenuItem<TaskStatus>(
-                        value: value,
-                        child: Text(
-                          _mapTaskStatus(value),
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                      );
+              const SizedBox(height: 2),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  DropdownButton<TaskStatus>(
+                    value: task.status,
+                    onChanged: (TaskStatus? newValue) {
+                      if (newValue != null) {
+                        _updateTaskStatus(task, newValue);
+                      }
                     },
-                  ).toList(),
-                  dropdownColor: theme.colorScheme.surface,
-                  icon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurface, size: 20),
-                  underline: Container(
-                    height: 1,
-                    color: theme.colorScheme.onSurface.withOpacity(0.3),
+                    items: TaskStatus.values.map<DropdownMenuItem<TaskStatus>>(
+                      (TaskStatus value) {
+                        return DropdownMenuItem<TaskStatus>(
+                          value: value,
+                          child: Text(
+                            _mapTaskStatus(value),
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        );
+                      },
+                    ).toList(),
+                    dropdownColor: theme.colorScheme.surface,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: theme.colorScheme.onSurface,
+                      size: 20,
+                    ),
+                    underline: Container(
+                      height: 1,
+                      color: theme.colorScheme.onSurface.withOpacity(0.3),
+                    ),
                   ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
-                ),
-              ],
-            ),
-          ],
+                  Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<void> _updateTaskStatus(Task task, TaskStatus newStatus) async {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
@@ -282,33 +281,6 @@ Widget _buildTaskCard(Task task, ThemeData theme) {
         },
       ),
     );
-  }
-
-  Future<void> _deleteTask(Task task) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete Task'),
-          content: const Text('Are you sure you want to delete this task?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed ?? false) {
-      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-      await taskProvider.deleteAssignedTask(task.id);
-    }
   }
 
   String _mapTaskStatus(TaskStatus status) {

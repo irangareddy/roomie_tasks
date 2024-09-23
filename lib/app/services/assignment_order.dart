@@ -63,7 +63,14 @@ class AssignmentOrder {
     String taskName,
     List<String> currentRoommates,
     DateTime assignmentDate,
+    TaskFrequency frequency,
   ) {
+    if (!frequency.isRecurring) {
+      // For one-time tasks, return a random roommate without
+      // updating the assignment order
+      return currentRoommates[Random().nextInt(currentRoommates.length)];
+    }
+
     final roommateScores = <String, double>{};
 
     for (final roommate in currentRoommates) {
@@ -79,18 +86,24 @@ class AssignmentOrder {
     final nextRoommate =
         roommateScores.entries.reduce((a, b) => a.value < b.value ? a : b).key;
 
-    // Update the assignment order
-    updateAssignment(taskName, nextRoommate);
+    // Update the assignment order only for recurring tasks
+    updateAssignment(taskName, nextRoommate, frequency);
 
     return nextRoommate;
   }
 
-  void updateAssignment(String taskName, String roommate) {
-    taskToRoommateIndex.putIfAbsent(taskName, () => {})[roommate] =
-        (taskToRoommateIndex[taskName]?[roommate] ?? 0) + 1;
-    _updateLastAssignmentDate(taskName, roommate, DateTime.now());
-    _updateFairnessScore(roommate, TaskFrequency.daily);
-    lastUpdated = DateTime.now();
+  void updateAssignment(
+    String taskName,
+    String roommate,
+    TaskFrequency frequency,
+  ) {
+    if (frequency.isRecurring) {
+      taskToRoommateIndex.putIfAbsent(taskName, () => {})[roommate] =
+          (taskToRoommateIndex[taskName]?[roommate] ?? 0) + 1;
+      _updateLastAssignmentDate(taskName, roommate, DateTime.now());
+      _updateFairnessScore(roommate, frequency);
+      lastUpdated = DateTime.now();
+    }
   }
 
   void _updateFairnessScore(String roommate, TaskFrequency frequency) {

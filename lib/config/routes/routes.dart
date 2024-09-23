@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:roomie_tasks/app/models/task.dart';
 import 'package:roomie_tasks/app/pages/add_roommates_page.dart';
 import 'package:roomie_tasks/app/pages/add_tasks_page.dart';
 import 'package:roomie_tasks/app/pages/googlesheets_setup_page.dart';
 import 'package:roomie_tasks/app/pages/onboarding/splash_screen.dart';
 import 'package:roomie_tasks/app/pages/settings_page.dart';
+import 'package:roomie_tasks/app/pages/stats_page.dart';
+import 'package:roomie_tasks/app/pages/task_detail_page.dart';
 import 'package:roomie_tasks/app/pages/task_list_page.dart';
 import 'package:roomie_tasks/app/providers/googlesheets_setup_provider.dart';
 import 'package:roomie_tasks/app/services/onboarding_service.dart';
@@ -19,6 +22,8 @@ class AppRoutes {
   static const addTasks = '/add-tasks';
   static const taskList = '/task-list';
   static const settings = '/settings';
+  static const stats = '/stats';
+  static const taskDetail = '/task-detail';
 }
 
 final router = GoRouter(
@@ -58,8 +63,23 @@ final router = GoRouter(
       builder: (context, state) => const TaskListPage(),
     ),
     GoRoute(
+      path: AppRoutes.taskDetail,
+      builder: (context, state) {
+        final task = state.extra! as Task;
+        return TaskDetailPage(task: task);
+      },
+    ),
+    GoRoute(
       path: AppRoutes.settings,
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.stats,
+      builder: (context, state) => const StatsPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.stats,
+      builder: (context, state) => const StatsPage(),
     ),
   ],
   redirect: (BuildContext context, GoRouterState state) async {

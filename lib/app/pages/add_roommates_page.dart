@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:roomie_tasks/app/models/roommate.dart';
 import 'package:roomie_tasks/app/providers/rooommate_provider.dart';
+import 'package:roomie_tasks/app/providers/theme_provider.dart';
 import 'package:roomie_tasks/config/routes/routes.dart';
 
 class AddRoommatesPage extends StatefulWidget {
@@ -42,51 +44,98 @@ class _AddRoommatesPageState extends State<AddRoommatesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Roommates'),
-      ),
-      body: Consumer<RoommateProvider>(
-        builder: (context, provider, child) {
-          if (provider.roommates.isEmpty) {
-            return const Center(child: Text('No roommates added yet.'));
-          }
-          return ListView.builder(
-            itemCount: provider.roommates.length,
-            itemBuilder: (context, index) {
-              final roommate = provider.roommates[index];
-              return ListTile(
-                title: Text(roommate.name),
-                subtitle: Text(roommate.email ?? 'No email'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _editRoommate(roommate),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final theme = Theme.of(context);
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Roommates'),
+          ),
+          body: Consumer<RoommateProvider>(
+            builder: (context, provider, child) {
+              if (provider.roommates.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/no_roommates.svg',
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          "Your Squad's Missing!",
+                          style: theme.textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          // ignore: lines_longer_than_80_chars
+                          'Hit the + and add your roommates to get things done together!',
+                          style: theme.textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 200),
+                      ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => provider.deleteRoommate(roommate.id),
+                  ),
+                );
+              }
+              return ListView.builder(
+                itemCount: provider.roommates.length,
+                itemBuilder: (context, index) {
+                  final roommate = provider.roommates[index];
+                  return ListTile(
+                    title: Text(
+                      roommate.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
-                  ],
-                ),
+                    subtitle: Text(
+                      roommate.email ?? 'No email',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.edit,
+                            color: theme.colorScheme.primary,
+                          ),
+                          onPressed: () => _editRoommate(roommate),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.delete,
+                            color: theme.colorScheme.error,
+                          ),
+                          onPressed: () => provider.deleteRoommate(roommate.id),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddRoommateSheet,
-        child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8),
-        child: ElevatedButton(
-          onPressed: () => context.go(AppRoutes.addTasks),
-          child: const Text('Next: Add Tasks'),
-        ),
-      ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _showAddRoommateSheet,
+            child: const Icon(Icons.add),
+          ),
+          bottomNavigationBar: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton(
+              onPressed: () => context.go(AppRoutes.addTasks),
+              child: const Text('Next: Add Tasks'),
+            ),
+          ),
+        );
+      },
     );
   }
 }

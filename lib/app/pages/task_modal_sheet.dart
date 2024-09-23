@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:roomie_tasks/app/models/task.dart';
+import 'package:roomie_tasks/app/models/models.dart';
 import 'package:roomie_tasks/app/providers/providers.dart';
-import 'package:roomie_tasks/app/services/service_utils.dart';
+import 'package:roomie_tasks/app/services/services.dart';
 
 class TaskModalSheet extends StatefulWidget {
   const TaskModalSheet({super.key, this.task});
@@ -159,38 +159,41 @@ class _TaskModalSheetState extends State<TaskModalSheet> {
               },
             ),
             const SizedBox(height: 16),
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _startDate,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 365)),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _startDate = picked;
-                  });
-                }
-              },
-              child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Start Date',
-                  suffixIcon: Icon(Icons.calendar_today),
-                ),
-                child: Text(
-                  _startDate.toString().split(' ')[0],
-                  style: theme.textTheme.bodyLarge,
+            if (_frequency != TaskFrequency.once)
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _startDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _startDate = picked;
+                    });
+                  }
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Start Date',
+                    suffixIcon: Icon(Icons.calendar_today),
+                  ),
+                  child: Text(
+                    _startDate.toString().split(' ')[0],
+                    style: theme.textTheme.bodyLarge,
+                  ),
                 ),
               ),
-            ),
             const SizedBox(height: 16),
             InkWell(
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
                   initialDate: _endDate,
-                  firstDate: _startDate,
+                  firstDate: _frequency == TaskFrequency.once
+                      ? DateTime.now()
+                      : _startDate,
                   lastDate: DateTime.now().add(const Duration(days: 365)),
                 );
                 if (picked != null) {
@@ -200,9 +203,11 @@ class _TaskModalSheetState extends State<TaskModalSheet> {
                 }
               },
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'End Date',
-                  suffixIcon: Icon(Icons.calendar_today),
+                decoration: InputDecoration(
+                  labelText: _frequency == TaskFrequency.once
+                      ? 'Due Date'
+                      : 'End Date',
+                  suffixIcon: const Icon(Icons.calendar_today),
                 ),
                 child: Text(
                   _endDate.toString().split(' ')[0],
@@ -225,7 +230,6 @@ class _TaskModalSheetState extends State<TaskModalSheet> {
   void _saveTask() {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
 
-    // Fix 3: Validate task name
     if (_nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Task name cannot be empty')),
@@ -237,7 +241,7 @@ class _TaskModalSheetState extends State<TaskModalSheet> {
       id: widget.task?.id ?? ServiceUtils.generateUniqueId(),
       name: _nameController.text.trim(),
       frequency: _frequency,
-      startDate: _startDate,
+      startDate: _frequency == TaskFrequency.once ? _endDate : _startDate,
       endDate: _endDate,
       assignedTo: _assignedTo,
       status: widget.task?.status ?? TaskStatus.pending,
@@ -288,7 +292,7 @@ class _TaskModalSheetState extends State<TaskModalSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Task swapped to $newAssignee')),
         );
-      }).catchError((error) {
+      }).catchError((Object error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to swap task: $error')),
         );

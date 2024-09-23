@@ -13,8 +13,10 @@ class TaskFrequency {
   static const twiceWeekly = TaskFrequency('Twice a week', 2);
   static const thriceWeekly = TaskFrequency('Thrice a week', 3);
   static const monthly = TaskFrequency('Monthly', 0);
+  static const once = TaskFrequency('Once', -1);
 
   static const List<TaskFrequency> values = [
+    once,
     daily,
     weekly,
     twiceWeekly,
@@ -24,6 +26,8 @@ class TaskFrequency {
 
   @override
   String toString() => name;
+
+  bool get isRecurring => this != once;
 }
 
 class Task {

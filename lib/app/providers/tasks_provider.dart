@@ -46,7 +46,9 @@ class TaskProvider with ChangeNotifier {
   Future<void> addAssignedTask(Task task) async {
     final updatedTask = task.copyWith(
       originalAssignee: task.assignedTo,
-      templateId: task.templateId ?? ServiceUtils.generateUniqueId(),
+      templateId: task.frequency.isRecurring
+          ? (task.templateId ?? ServiceUtils.generateUniqueId())
+          : null,
     );
     await _sheetsService.taskService.addAssignedTask(updatedTask);
     _assignedTasks.add(updatedTask);

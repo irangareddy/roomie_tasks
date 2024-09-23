@@ -106,11 +106,14 @@ class TaskService {
         ? task.copyWith(originalAssignee: task.assignedTo)
         : task;
 
-    // Only update assignment order for tasks with a templateId
-    if (taskWithOriginalAssignee.templateId != null) {
+    // Only update assignment order for recurring tasks
+    if (taskWithOriginalAssignee.frequency.isRecurring &&
+        taskWithOriginalAssignee.templateId != null &&
+        taskWithOriginalAssignee.assignedTo != null) {
       _assignmentOrder.updateAssignment(
         taskWithOriginalAssignee.name,
         taskWithOriginalAssignee.assignedTo!,
+        taskWithOriginalAssignee.frequency,
       );
     }
 
@@ -158,6 +161,7 @@ class TaskService {
             template.name,
             roommates,
             startDate,
+            template.frequency,
           );
           final assignedTask = Task(
             id: ServiceUtils.generateUniqueId(),
@@ -248,9 +252,13 @@ class TaskService {
 
     await updateAssignedTask(updatedTask);
 
-    // Update assignment order only for template-based tasks
-    if (updatedTask.templateId != null) {
-      _assignmentOrder.updateAssignment(updatedTask.name, newAssignee);
+    // Update assignment order only for recurring template-based tasks
+    if (updatedTask.templateId != null && updatedTask.frequency.isRecurring) {
+      _assignmentOrder.updateAssignment(
+        updatedTask.name,
+        newAssignee,
+        updatedTask.frequency,
+      );
       await _saveAssignmentOrder();
     }
 
@@ -261,7 +269,8 @@ class TaskService {
         (t) =>
             t.assignedTo == newAssignee &&
             t.id != taskId &&
-            t.templateId != null,
+            t.templateId != null &&
+            t.frequency.isRecurring,
       );
     } catch (e) {
       // No task found to swap back
@@ -277,6 +286,7 @@ class TaskService {
       _assignmentOrder.updateAssignment(
         swappedBackTask.name,
         originalAssignee!,
+        swappedBackTask.frequency,
       );
       await _saveAssignmentOrder();
     }
@@ -327,18 +337,28 @@ class TaskService {
         if (task.assignedTo == removedRoommate) {
           final assignmentDate =
               task.startDate!.isAfter(now) ? task.startDate : now;
-          final newAssignee = _assignmentOrder.getNextRoommate(
-            task.name,
-            remainingNames,
-            assignmentDate!,
-          );
+          String newAssignee;
+          if (task.frequency.isRecurring) {
+            newAssignee = _assignmentOrder.getNextRoommate(
+              task.name,
+              remainingNames,
+              assignmentDate!,
+              task.frequency,
+            );
+          } else {
+            // For one-time tasks, assign randomly
+            newAssignee =
+                remainingNames[math.Random().nextInt(remainingNames.length)];
+          }
           final updatedTask = Task(
             id: task.id,
             templateId: task.templateId,
             name: task.name,
             frequency: task.frequency,
             startDate: assignmentDate,
-            endDate: assignmentDate.add(const Duration(days: 7)),
+            endDate: task.frequency.isRecurring
+                ? assignmentDate!.add(const Duration(days: 7))
+                : task.endDate,
             assignedTo: newAssignee,
             originalAssignee: newAssignee,
           );
@@ -348,7 +368,7 @@ class TaskService {
       }
       await _saveAssignmentOrder();
     } catch (e) {
-      Exception('Error reassigning tasks from removed roommate: $e');
+      throw Exception('Error reassigning tasks from removed roommate: $e');
     }
   }
 
