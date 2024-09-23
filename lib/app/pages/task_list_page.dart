@@ -96,7 +96,6 @@ class _TaskListPageState extends State<TaskListPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (!_isSetupComplete) {

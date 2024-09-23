@@ -1,7 +1,8 @@
 name: roomie_tasks
-description: Roomie Tasks
-version: 1.0.0+1
-publish_to: none
+description: A Flutter application for managing roommate tasks.
+version: 0.0.1+1
+homepage: https://github.com/irangareddy/roomie_tasks
+license: GPL-3.0
 
 environment:
   sdk: ^3.5.0

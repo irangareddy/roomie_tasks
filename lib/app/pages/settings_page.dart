@@ -132,10 +132,9 @@ class _SettingsPageState extends State<SettingsPage> {
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           title: const Text('License'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () {
-            // TODO(settings): Implement license view
-          },
+          trailing: const Icon(Icons.open_in_new),
+          onTap: () => _launchInBrowser(Uri.parse(
+              'https://github.com/irangareddy/roomie_tasks/blob/main/LICENSE',),),
         ),
         const Divider(
           thickness: 0.1,
@@ -264,7 +263,8 @@ class _SettingsPageState extends State<SettingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('All assigned tasks have been wiped off.'),),
+            content: Text('All assigned tasks have been wiped off.'),
+          ),
         );
       }
     }
