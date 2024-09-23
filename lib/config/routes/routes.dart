@@ -1,12 +1,17 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:roomie_tasks/app/pages/add_roommates_page.dart';
 import 'package:roomie_tasks/app/pages/add_tasks_page.dart';
 import 'package:roomie_tasks/app/pages/googlesheets_setup_page.dart';
+import 'package:roomie_tasks/app/pages/onboarding/splash_screen.dart';
 import 'package:roomie_tasks/app/pages/task_list_page.dart';
 import 'package:roomie_tasks/app/providers/googlesheets_setup_provider.dart';
+import 'package:roomie_tasks/app/services/onboarding_service.dart';
+import 'package:roomie_tasks/dependency_manager.dart';
 
 class AppRoutes {
+  static const splash = '/splash';
   static const home = '/';
   static const googleSheetsSetup = '/google-sheet-setup';
   static const addRoommates = '/add-roommates';
@@ -15,8 +20,12 @@ class AppRoutes {
 }
 
 final router = GoRouter(
-  initialLocation: AppRoutes.home,
+  initialLocation: AppRoutes.splash,
   routes: [
+    GoRoute(
+      path: AppRoutes.splash,
+      builder: (context, state) => const SplashScreen(),
+    ),
     GoRoute(
       path: AppRoutes.home,
       builder: (context, state) => const TaskListPage(),
@@ -47,4 +56,24 @@ final router = GoRouter(
       builder: (context, state) => const TaskListPage(),
     ),
   ],
+  redirect: (BuildContext context, GoRouterState state) async {
+    final onboardingService = sl<OnboardingService>();
+    final isOnboardingCompleted =
+        await onboardingService.isOnboardingCompleted();
+
+    // If onboarding is not completed and we're not already on the splash 
+    // screen, redirect to splash
+    if (!isOnboardingCompleted && state.uri.toString() != AppRoutes.splash) {
+      return AppRoutes.splash;
+    }
+
+    // If onboarding is completed and we're on the splash screen, 
+    // redirect to home
+    if (isOnboardingCompleted && state.uri.toString() == AppRoutes.splash) {
+      return AppRoutes.home;
+    }
+
+    // In all other cases, don't redirect
+    return null;
+  },
 );

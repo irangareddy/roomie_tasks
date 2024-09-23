@@ -35,6 +35,15 @@
   - Implemented a modal bottom sheet for adding new task templates
   - Added suggested tasks feature with emoji support
   - Implemented task frequency selection in the add task form
+- Implemented onboarding experience:
+  - Created `SplashScreen` widget for displaying onboarding pages
+  - Added `OnboardingService` to manage onboarding state
+  - Integrated SVG images for onboarding illustrations
+  - Implemented page indicators and navigation buttons for onboarding flow
+- Updated routing to include onboarding flow:
+  - Added splash route to `AppRoutes`
+  - Implemented redirection logic in `GoRouter` to handle onboarding state
+- Added `flutter_svg` package for rendering SVG images
 
 ### Changed
 
@@ -58,6 +67,9 @@
   - Improved layout of task template list
   - Added empty state message when no task templates exist
   - Refactored task addition process to use a modal bottom sheet
+- Modified `GoRouter` configuration to start with the splash screen
+- Updated `DependencyManager` to include `OnboardingService`
+- Refactored `StorageService` to use an enum `StorageKey` for consistent key management  
 
 ### Fixed
 
@@ -67,6 +79,7 @@
 - Resolved issues with task template management in `AddTasksPage`:
   - Fixed task template addition and deletion
   - Improved error handling in task template operations
+- Improved navigation flow to ensure users complete onboarding before accessing main app features
 
 ### Removed
 
