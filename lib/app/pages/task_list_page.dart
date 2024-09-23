@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:roomie_tasks/app/models/task.dart';
+import 'package:roomie_tasks/app/pages/task_detail_page.dart';
 import 'package:roomie_tasks/app/pages/task_modal_sheet.dart';
 import 'package:roomie_tasks/app/providers/providers.dart';
 import 'package:roomie_tasks/app/providers/theme_provider.dart';
@@ -190,12 +191,20 @@ class _TaskListPageState extends State<TaskListPage> {
     );
   }
 
-  Widget _buildTaskCard(Task task, ThemeData theme) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      color: theme.colorScheme.surface,
+Widget _buildTaskCard(Task task, ThemeData theme) {
+  return Card(
+    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+    elevation: 2,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    color: theme.colorScheme.surface,
+    child: InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => TaskDetailPage(task: task),
+          ),
+        );
+      },
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -245,30 +254,18 @@ class _TaskListPageState extends State<TaskListPage> {
                     color: theme.colorScheme.onSurface.withOpacity(0.3),
                   ),
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit, color: theme.colorScheme.primary, size: 22),
-                      onPressed: () => _showTaskModal(task: task),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: theme.colorScheme.error, size: 22),
-                      onPressed: () => _deleteTask(task),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurface.withOpacity(0.5),
                 ),
               ],
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Future<void> _updateTaskStatus(Task task, TaskStatus newStatus) async {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
