@@ -22,13 +22,13 @@ class _AddTasksPageState extends State<AddTasksPage> {
   @override
   void initState() {
     super.initState();
-    _loadTemplateTasks();
+    _loadHouseholdTasks();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TaskProvider>().loadTaskTemplates();
+      context.read<TaskProvider>().loadHouseholdTasks();
     });
   }
 
-  Future<void> _loadTemplateTasks() async {
+  Future<void> _loadHouseholdTasks() async {
     final jsonString =
         await rootBundle.loadString('assets/template_tasks.json');
     final jsonData = json.decode(jsonString) as Map<String, dynamic>;
@@ -38,18 +38,18 @@ class _AddTasksPageState extends State<AddTasksPage> {
     });
   }
 
-  Future<void> _addTaskTemplate() async {
+  Future<void> _addHouseholdTask() async {
     if (_taskNameController.text.isNotEmpty) {
       final task = Task(
         name: _taskNameController.text,
         frequency: _frequency,
       );
-      await context.read<TaskProvider>().addTaskTemplate(task);
+      await context.read<TaskProvider>().addHouseholdTask(task);
       _taskNameController.clear();
     }
   }
 
-  Future<void> _editTaskTemplate(Task task) async {
+  Future<void> _editHouseholdTask(Task task) async {
     _taskNameController.text = task.name;
     _frequency = task.frequency;
 
@@ -103,7 +103,7 @@ class _AddTasksPageState extends State<AddTasksPage> {
     );
 
     if (result != null) {
-      await context.read<TaskProvider>().updateTaskTemplate(result);
+      await context.read<TaskProvider>().updateHouseholdTask(result);
     }
   }
 
@@ -126,7 +126,7 @@ class _AddTasksPageState extends State<AddTasksPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Add Custom Task',
+                    'Add Household Task',
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 16),
@@ -156,7 +156,7 @@ class _AddTasksPageState extends State<AddTasksPage> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      _addTaskTemplate();
+                      _addHouseholdTask();
                       Navigator.pop(context);
                     },
                     child: const Text('Add Task'),
@@ -210,7 +210,7 @@ class _AddTasksPageState extends State<AddTasksPage> {
         final theme = Theme.of(context);
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Task Templates'),
+            title: const Text('Household Tasks'),
           ),
           body: Consumer<TaskProvider>(
             builder: (context, taskProvider, child) {
@@ -268,7 +268,7 @@ class _AddTasksPageState extends State<AddTasksPage> {
                             Icons.edit,
                             color: theme.colorScheme.primary,
                           ),
-                          onPressed: () => _editTaskTemplate(task),
+                          onPressed: () => _editHouseholdTask(task),
                         ),
                         IconButton(
                           icon: Icon(
@@ -276,7 +276,7 @@ class _AddTasksPageState extends State<AddTasksPage> {
                             color: theme.colorScheme.error,
                           ),
                           onPressed: () =>
-                              taskProvider.deleteTaskTemplate(task.id),
+                              taskProvider.deleteHouseholdTask(task.id),
                         ),
                       ],
                     ),

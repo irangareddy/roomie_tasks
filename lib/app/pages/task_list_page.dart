@@ -34,7 +34,7 @@ class _TaskListPageState extends State<TaskListPage> {
 
     try {
       await roommateProvider.loadRoommates();
-      await taskProvider.loadTaskTemplates();
+      await taskProvider.loadHouseholdTasks();
       await taskProvider.loadAssignedTasks();
     } catch (e) {
       Exception('Error in _loadData: $e');
@@ -99,10 +99,10 @@ class _TaskListPageState extends State<TaskListPage> {
                         final tasks = taskProvider.assignedTasks;
                         final hasRoommates =
                             roommateProvider.roommates.isNotEmpty;
-                        final hasTaskTemplates =
+                        final hasHouseholdTasks =
                             taskProvider.taskTemplates.isNotEmpty;
 
-                        if (!hasRoommates || !hasTaskTemplates) {
+                        if (!hasRoommates || !hasHouseholdTasks) {
                           return Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -113,11 +113,11 @@ class _TaskListPageState extends State<TaskListPage> {
                                         context.go(AppRoutes.addRoommates),
                                     child: const Text('Add Roommates'),
                                   ),
-                                if (!hasTaskTemplates)
+                                if (!hasHouseholdTasks)
                                   ElevatedButton(
                                     onPressed: () =>
                                         context.go(AppRoutes.addTasks),
-                                    child: const Text('Add Task Templates'),
+                                    child: const Text('Add Household Tasks'),
                                   ),
                               ],
                             ),

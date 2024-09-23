@@ -48,7 +48,7 @@ class TaskService {
       _assignmentOrder = AssignmentOrder.fromJson(savedOrder);
     } else {
       final roommates = await roommateService.loadRoommates();
-      final tasks = await loadTaskTemplates();
+      final tasks = await loadHouseholdTasks();
       _assignmentOrder = AssignmentOrder.initialize(
         roommates.map((r) => r.name).toList(),
         tasks.map((t) => t.name).toList(),
@@ -58,16 +58,16 @@ class TaskService {
   }
 
   // CRUD operations for task templates
-  Future<List<Task>> loadTaskTemplates() async {
+  Future<List<Task>> loadHouseholdTasks() async {
     final rows = await taskTemplatesSheet.values.allRows(fromRow: 2);
-    return rows.map(_rowToTaskTemplate).toList();
+    return rows.map(_rowToHouseholdTask).toList();
   }
 
-  Future<void> addTaskTemplate(Task task) async {
+  Future<void> addHouseholdTask(Task task) async {
     await taskTemplatesSheet.values.appendRow(_taskTemplateToRow(task));
   }
 
-  Future<void> updateTaskTemplate(Task task) async {
+  Future<void> updateHouseholdTask(Task task) async {
     final rowIndex =
         await ServiceUtils.findRowIndexById(taskTemplatesSheet, task.id);
     if (rowIndex != null) {
@@ -76,7 +76,7 @@ class TaskService {
     }
   }
 
-  Future<void> deleteTaskTemplate(String taskId) async {
+  Future<void> deleteHouseholdTask(String taskId) async {
     final rowIndex =
         await ServiceUtils.findRowIndexById(taskTemplatesSheet, taskId);
     if (rowIndex != null) {
@@ -152,7 +152,7 @@ class TaskService {
     try {
       await clearFutureTasks();
       final endDate = startDate.add(const Duration(days: 7));
-      final taskTemplates = await loadTaskTemplates();
+      final taskTemplates = await loadHouseholdTasks();
       final assignedTasks = <Task>[];
 
       for (final template in taskTemplates) {
@@ -373,7 +373,7 @@ class TaskService {
   }
 
   Future<void> _assignTasksToNewRoommate(String newRoommate) async {
-    final tasks = await loadTaskTemplates();
+    final tasks = await loadHouseholdTasks();
     final today = DateTime.now();
     final endOfWeek = today.add(Duration(days: 7 - today.weekday));
 
@@ -395,7 +395,7 @@ class TaskService {
   }
 
   // Utility methods
-  Task _rowToTaskTemplate(List<String> row) {
+  Task _rowToHouseholdTask(List<String> row) {
     return Task(
       id: row[0],
       name: row[1],
@@ -517,7 +517,7 @@ class TaskService {
 
   Future<Map<String, dynamic>> generateFairnessReport() async {
     final report = <String, dynamic>{};
-    final tasks = await loadTaskTemplates();
+    final tasks = await loadHouseholdTasks();
     final roommates = await roommateService.loadRoommates();
 
     for (final task in tasks) {

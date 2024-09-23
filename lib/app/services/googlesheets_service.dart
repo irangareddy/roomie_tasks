@@ -26,7 +26,7 @@ class GoogleSheetsService {
 
   Future<void> _initializeWorksheets() async {
     final taskTemplatesSheet =
-        await ServiceUtils.getOrCreateWorksheet(_spreadsheet, 'TaskTemplates');
+        await ServiceUtils.getOrCreateWorksheet(_spreadsheet, 'HouseholdTasks');
     final assignedTasksSheet =
         await ServiceUtils.getOrCreateWorksheet(_spreadsheet, 'AssignedTasks');
     final roommatesSheet =

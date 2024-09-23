@@ -12,8 +12,8 @@ class TaskProvider with ChangeNotifier {
   List<Task> get taskTemplates => _taskTemplates;
   List<Task> get assignedTasks => _assignedTasks;
 
-  Future<void> loadTaskTemplates() async {
-    _taskTemplates = await _sheetsService.taskService.loadTaskTemplates();
+  Future<void> loadHouseholdTasks() async {
+    _taskTemplates = await _sheetsService.taskService.loadHouseholdTasks();
     notifyListeners();
   }
 
@@ -22,14 +22,14 @@ class TaskProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addTaskTemplate(Task task) async {
-    await _sheetsService.taskService.addTaskTemplate(task);
+  Future<void> addHouseholdTask(Task task) async {
+    await _sheetsService.taskService.addHouseholdTask(task);
     _taskTemplates.add(task);
     notifyListeners();
   }
 
-  Future<void> updateTaskTemplate(Task task) async {
-    await _sheetsService.taskService.updateTaskTemplate(task);
+  Future<void> updateHouseholdTask(Task task) async {
+    await _sheetsService.taskService.updateHouseholdTask(task);
     final index = _taskTemplates.indexWhere((t) => t.id == task.id);
     if (index != -1) {
       _taskTemplates[index] = task;
@@ -37,8 +37,8 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<void> deleteTaskTemplate(String id) async {
-    await _sheetsService.taskService.deleteTaskTemplate(id);
+  Future<void> deleteHouseholdTask(String id) async {
+    await _sheetsService.taskService.deleteHouseholdTask(id);
     _taskTemplates.removeWhere((t) => t.id == id);
     notifyListeners();
   }

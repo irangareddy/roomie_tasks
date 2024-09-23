@@ -67,7 +67,7 @@ class _TaskModalSheetState extends State<TaskModalSheet> {
                             ? colorScheme.onPrimary
                             : colorScheme.onSurface,
                       ),
-                      child: const Text('Custom Task'),
+                      child: const Text('Household Task'),
                     ),
                   ),
                   const SizedBox(width: 16),
