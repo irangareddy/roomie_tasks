@@ -29,7 +29,8 @@ class _TaskListPageState extends State<TaskListPage> {
   }
 
   Future<void> _checkSetupAndLoadData() async {
-    final setupProvider = Provider.of<GoogleSheetsSetupProvider>(context, listen: false);
+    final setupProvider =
+        Provider.of<GoogleSheetsSetupProvider>(context, listen: false);
     _isSetupComplete = await setupProvider.isSetupComplete();
 
     if (_isSetupComplete) {
@@ -41,7 +42,8 @@ class _TaskListPageState extends State<TaskListPage> {
 
   Future<void> _loadData() async {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-    final roommateProvider = Provider.of<RoommateProvider>(context, listen: false);
+    final roommateProvider =
+        Provider.of<RoommateProvider>(context, listen: false);
 
     try {
       await roommateProvider.loadRoommates();
@@ -117,7 +119,8 @@ class _TaskListPageState extends State<TaskListPage> {
         final tasks = taskProvider.assignedTasks;
         final hasRoommates = roommateProvider.roommates.isNotEmpty;
         final hasHouseholdTasks = taskProvider.taskTemplates.isNotEmpty;
-        final theme = Theme.of(context);  // Add this line to get the current theme
+        final theme =
+            Theme.of(context); // Add this line to get the current theme
 
         if (!hasRoommates || !hasHouseholdTasks) {
           return Center(
@@ -126,14 +129,12 @@ class _TaskListPageState extends State<TaskListPage> {
               children: [
                 if (!hasRoommates)
                   ElevatedButton(
-                    onPressed: () =>
-                        context.go(AppRoutes.addRoommates),
+                    onPressed: () => context.go(AppRoutes.addRoommates),
                     child: const Text('Add Roommates'),
                   ),
                 if (!hasHouseholdTasks)
                   ElevatedButton(
-                    onPressed: () =>
-                        context.go(AppRoutes.addTasks),
+                    onPressed: () => context.go(AppRoutes.addTasks),
                     child: const Text('Add Household Tasks'),
                   ),
               ],
@@ -142,30 +143,32 @@ class _TaskListPageState extends State<TaskListPage> {
         }
 
         if (tasks.isEmpty) {
-          return Padding(padding: const EdgeInsets.all(24),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset(
-                  'assets/images/empty_tasks.svg',
-                  height: 300,
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Chillin’! No Roomie Tasks Left!',
-                  style: theme.textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  // ignore: lines_longer_than_80_chars
-                  'Feeling the vibe? Smash that + to set up some tasks!',
-                  style: theme.textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 200),
-              ],
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets/images/empty_tasks.svg',
+                    height: 300,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Chillin’! No Roomie Tasks Left!',
+                    style: theme.textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    // ignore: lines_longer_than_80_chars
+                    'Feeling the vibe? Smash that + to set up some tasks!',
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 200),
+                ],
+              ),
             ),
-          ),);
+          );
         }
 
         final groupedTasks = _groupTasksByDate(tasks);
@@ -184,14 +187,12 @@ class _TaskListPageState extends State<TaskListPage> {
                   padding: const EdgeInsets.all(8),
                   child: Text(
                     _formatDate(date),
-                    style:
-                        theme.textTheme.titleMedium?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       color: isOverdue ? Colors.red : null,
                     ),
                   ),
                 ),
-                ...tasksForDate
-                    .map((task) => _buildTaskCard(task, theme)),
+                ...tasksForDate.map((task) => _buildTaskCard(task, theme)),
               ],
             );
           },

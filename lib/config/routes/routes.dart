@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:roomie_tasks/app/models/task.dart';
 import 'package:roomie_tasks/app/pages/add_roommates_page.dart';
 import 'package:roomie_tasks/app/pages/add_tasks_page.dart';
@@ -10,7 +9,6 @@ import 'package:roomie_tasks/app/pages/settings_page.dart';
 import 'package:roomie_tasks/app/pages/stats_page.dart';
 import 'package:roomie_tasks/app/pages/task_detail_page.dart';
 import 'package:roomie_tasks/app/pages/task_list_page.dart';
-import 'package:roomie_tasks/app/providers/googlesheets_setup_provider.dart';
 import 'package:roomie_tasks/app/services/onboarding_service.dart';
 import 'package:roomie_tasks/dependency_manager.dart';
 
@@ -66,7 +64,8 @@ final router = GoRouter(
   ],
   redirect: (BuildContext context, GoRouterState state) async {
     final onboardingService = sl<OnboardingService>();
-    final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
+    final isOnboardingCompleted =
+        await onboardingService.isOnboardingCompleted();
 
     if (!isOnboardingCompleted) {
       return AppRoutes.splash;
