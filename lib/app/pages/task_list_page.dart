@@ -18,173 +18,181 @@ class TaskListPage extends StatefulWidget {
 
 class _TaskListPageState extends State<TaskListPage> {
   bool _isLoading = true;
+  bool _isSetupComplete = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
+      _checkSetupAndLoadData();
     });
+  }
+
+  Future<void> _checkSetupAndLoadData() async {
+    final setupProvider = Provider.of<GoogleSheetsSetupProvider>(context, listen: false);
+    _isSetupComplete = await setupProvider.isSetupComplete();
+
+    if (_isSetupComplete) {
+      await _loadData();
+    }
+
+    setState(() => _isLoading = false);
   }
 
   Future<void> _loadData() async {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-    final roommateProvider =
-        Provider.of<RoommateProvider>(context, listen: false);
+    final roommateProvider = Provider.of<RoommateProvider>(context, listen: false);
 
     try {
       await roommateProvider.loadRoommates();
       await taskProvider.loadHouseholdTasks();
       await taskProvider.loadAssignedTasks();
     } catch (e) {
-      Exception('Error in _loadData: $e');
+      debugPrint('Error in _loadData: $e');
     }
-
-    setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        final theme = Theme.of(context);
-        return FutureBuilder<bool>(
-          future: Provider.of<GoogleSheetsSetupProvider>(context, listen: false)
-              .isSetupComplete(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Roomie Tasks'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.people),
+                onPressed: () => context.push(AppRoutes.addRoommates),
+                tooltip: 'Manage Roommates',
+              ),
+              IconButton(
+                icon: const Icon(Icons.list_alt),
+                onPressed: () => context.push(AppRoutes.addTasks),
+                tooltip: 'Manage Template Tasks',
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => context.push(AppRoutes.settings),
+                tooltip: 'Settings',
+              ),
+            ],
+          ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : !_isSetupComplete
+                  ? _buildSetupRequiredView()
+                  : _buildTaskListView(),
+          floatingActionButton: FloatingActionButton(
+            onPressed: _isSetupComplete ? _showTaskModal : null,
+            tooltip: 'Add Task',
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
+    );
+  }
 
-            if (snapshot.data == false) {
-              return Scaffold(
-                appBar: AppBar(title: const Text('Setup Required')),
-                body: Center(
-                  child: ElevatedButton(
-                    onPressed: () => context.go(AppRoutes.googleSheetsSetup),
-                    child: const Text('Complete Google Sheets Setup'),
+  Widget _buildSetupRequiredView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Google Sheets Setup Required',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => context.push(AppRoutes.googleSheetsSetup),
+            child: const Text('Complete Google Sheets Setup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskListView() {
+    return Consumer2<TaskProvider, RoommateProvider>(
+      builder: (context, taskProvider, roommateProvider, child) {
+        final tasks = taskProvider.assignedTasks;
+        final hasRoommates = roommateProvider.roommates.isNotEmpty;
+        final hasHouseholdTasks = taskProvider.taskTemplates.isNotEmpty;
+        final theme = Theme.of(context);  // Add this line to get the current theme
+
+        if (!hasRoommates || !hasHouseholdTasks) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (!hasRoommates)
+                  ElevatedButton(
+                    onPressed: () =>
+                        context.go(AppRoutes.addRoommates),
+                    child: const Text('Add Roommates'),
+                  ),
+                if (!hasHouseholdTasks)
+                  ElevatedButton(
+                    onPressed: () =>
+                        context.go(AppRoutes.addTasks),
+                    child: const Text('Add Household Tasks'),
+                  ),
+              ],
+            ),
+          );
+        }
+
+        if (tasks.isEmpty) {
+          return Padding(padding: const EdgeInsets.all(24),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  'assets/images/empty_tasks.svg',
+                  height: 300,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Chillin’! No Roomie Tasks Left!',
+                  style: theme.textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  // ignore: lines_longer_than_80_chars
+                  'Feeling the vibe? Smash that + to set up some tasks!',
+                  style: theme.textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 200),
+              ],
+            ),
+          ),);
+        }
+
+        final groupedTasks = _groupTasksByDate(tasks);
+        final sortedDates = groupedTasks.keys.toList()..sort();
+
+        return ListView.builder(
+          itemCount: sortedDates.length,
+          itemBuilder: (context, index) {
+            final date = sortedDates[index];
+            final tasksForDate = groupedTasks[date]!;
+            final isOverdue = date.isBefore(DateTime.now());
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    _formatDate(date),
+                    style:
+                        theme.textTheme.titleMedium?.copyWith(
+                      color: isOverdue ? Colors.red : null,
+                    ),
                   ),
                 ),
-              );
-            }
-
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('Roomie Tasks'),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.people),
-                    onPressed: () => context.push(AppRoutes.addRoommates),
-                    tooltip: 'Manage Roommates',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.list_alt),
-                    onPressed: () => context.push(AppRoutes.addTasks),
-                    tooltip: 'Manage Template Tasks',
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings),
-                    onPressed: () => context.push(AppRoutes.settings),
-                    tooltip: 'Settings',
-                  ),
-                ],
-              ),
-              body: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : Consumer2<TaskProvider, RoommateProvider>(
-                      builder:
-                          (context, taskProvider, roommateProvider, child) {
-                        final tasks = taskProvider.assignedTasks;
-                        final hasRoommates =
-                            roommateProvider.roommates.isNotEmpty;
-                        final hasHouseholdTasks =
-                            taskProvider.taskTemplates.isNotEmpty;
-
-                        if (!hasRoommates || !hasHouseholdTasks) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (!hasRoommates)
-                                  ElevatedButton(
-                                    onPressed: () =>
-                                        context.go(AppRoutes.addRoommates),
-                                    child: const Text('Add Roommates'),
-                                  ),
-                                if (!hasHouseholdTasks)
-                                  ElevatedButton(
-                                    onPressed: () =>
-                                        context.go(AppRoutes.addTasks),
-                                    child: const Text('Add Household Tasks'),
-                                  ),
-                              ],
-                            ),
-                          );
-                        }
-
-                        if (tasks.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/images/empty_tasks.svg',
-                                  height: 300,
-                                ),
-                                const SizedBox(height: 20),
-                                Text(
-                                  'Chillin’! No Roomie Tasks Left!',
-                                  style: theme.textTheme.headlineSmall,
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  // ignore: lines_longer_than_80_chars
-                                  'Feeling the vibe? Smash that + to set up some tasks!',
-                                  style: theme.textTheme.bodyLarge,
-                                ),
-                                const SizedBox(height: 200),
-                              ],
-                            ),
-                          );
-                        }
-
-                        final groupedTasks = _groupTasksByDate(tasks);
-                        final sortedDates = groupedTasks.keys.toList()..sort();
-
-                        return ListView.builder(
-                          itemCount: sortedDates.length,
-                          itemBuilder: (context, index) {
-                            final date = sortedDates[index];
-                            final tasksForDate = groupedTasks[date]!;
-                            final isOverdue = date.isBefore(DateTime.now());
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Text(
-                                    _formatDate(date),
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
-                                      color: isOverdue ? Colors.red : null,
-                                    ),
-                                  ),
-                                ),
-                                ...tasksForDate
-                                    .map((task) => _buildTaskCard(task, theme)),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                    ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: _showTaskModal,
-                tooltip: 'Add Task',
-                child: const Icon(Icons.add),
-              ),
+                ...tasksForDate
+                    .map((task) => _buildTaskCard(task, theme)),
+              ],
             );
           },
         );

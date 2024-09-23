@@ -114,87 +114,89 @@ class _AddTasksPageState extends State<AddTasksPage> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 16,
-                right: 16,
-                top: 16,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Add Household Task',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _taskNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Task Name',
-                      border: OutlineInputBorder(),
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).viewInsets.top,
+                ),
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Add Household Task',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _taskNameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Task Name',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButton<TaskFrequency>(
+                          value: _frequency,
+                          isExpanded: true,
+                          onChanged: (TaskFrequency? newValue) {
+                            if (newValue != null) {
+                              setState(() => _frequency = newValue);
+                            }
+                          },
+                          items: TaskFrequency.values
+                              .map((TaskFrequency frequency) {
+                            return DropdownMenuItem<TaskFrequency>(
+                              value: frequency,
+                              child: Text(frequency.name),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            _addHouseholdTask();
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Add Task'),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Suggested Tasks',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 2,
+                          children: _templateTasks.map((task) {
+                            return ActionChip(
+                              labelPadding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                              ),
+                              padding: const EdgeInsets.all(2),
+                              avatar: Text(
+                                task['emoji'] as String,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              label: Text(
+                                task['name'] as String,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              onPressed: () {
+                                _taskNameController.text =
+                                    task['name'] as String;
+                              },
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 80),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  DropdownButton<TaskFrequency>(
-                    value: _frequency,
-                    isExpanded: true,
-                    onChanged: (TaskFrequency? newValue) {
-                      if (newValue != null) {
-                        setState(() => _frequency = newValue);
-                      }
-                    },
-                    items: TaskFrequency.values.map((TaskFrequency frequency) {
-                      return DropdownMenuItem<TaskFrequency>(
-                        value: frequency,
-                        child: Text(frequency.name),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      _addHouseholdTask();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Add Task'),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Suggested Tasks',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 2,
-                    children: _templateTasks.map((task) {
-                      return ActionChip(
-                        labelPadding: const EdgeInsets.symmetric(
-                          horizontal: 2,
-                        ),
-                        padding: const EdgeInsets.all(
-                          2,
-                        ),
-                        avatar: Text(
-                          task['emoji'] as String,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        label: Text(
-                          task['name'] as String,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        onPressed: () {
-                          _taskNameController.text = task['name'] as String;
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(
-                    height: 80,
-                  ),
-                ],
+                ),
               ),
             );
           },
@@ -255,7 +257,7 @@ class _AddTasksPageState extends State<AddTasksPage> {
                       ),
                     ),
                     subtitle: Text(
-                      'Frequency: ${task.frequency.name}',
+                      task.frequency.name,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
                       ),

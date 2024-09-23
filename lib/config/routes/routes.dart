@@ -16,7 +16,6 @@ import 'package:roomie_tasks/dependency_manager.dart';
 
 class AppRoutes {
   static const splash = '/splash';
-  static const home = '/';
   static const googleSheetsSetup = '/google-sheet-setup';
   static const addRoommates = '/add-roommates';
   static const addTasks = '/add-tasks';
@@ -32,19 +31,6 @@ final router = GoRouter(
     GoRoute(
       path: AppRoutes.splash,
       builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.home,
-      builder: (context, state) => const TaskListPage(),
-      redirect: (context, state) async {
-        final setupProvider =
-            Provider.of<GoogleSheetsSetupProvider>(context, listen: false);
-        final isSetupComplete = await setupProvider.isSetupComplete();
-        if (!isSetupComplete) {
-          return AppRoutes.googleSheetsSetup;
-        }
-        return AppRoutes.taskList;
-      },
     ),
     GoRoute(
       path: AppRoutes.googleSheetsSetup,
@@ -77,26 +63,18 @@ final router = GoRouter(
       path: AppRoutes.stats,
       builder: (context, state) => const StatsPage(),
     ),
-    GoRoute(
-      path: AppRoutes.stats,
-      builder: (context, state) => const StatsPage(),
-    ),
   ],
   redirect: (BuildContext context, GoRouterState state) async {
     final onboardingService = sl<OnboardingService>();
-    final isOnboardingCompleted =
-        await onboardingService.isOnboardingCompleted();
+    final isOnboardingCompleted = await onboardingService.isOnboardingCompleted();
 
-    // If onboarding is not completed and we're not already on the splash
-    // screen, redirect to splash
-    if (!isOnboardingCompleted && state.uri.toString() != AppRoutes.splash) {
+    if (!isOnboardingCompleted) {
       return AppRoutes.splash;
     }
 
-    // If onboarding is completed and we're on the splash screen,
-    // redirect to home
-    if (isOnboardingCompleted && state.uri.toString() == AppRoutes.splash) {
-      return AppRoutes.home;
+    // Remove the Google Sheets setup check from here
+    if (state.uri.toString() == AppRoutes.splash) {
+      return AppRoutes.taskList;
     }
 
     // In all other cases, don't redirect

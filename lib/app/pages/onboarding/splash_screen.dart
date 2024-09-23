@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToHome() {
-    context.go(AppRoutes.home);
+    context.go(AppRoutes.taskList);
   }
 
   @override

@@ -24,16 +24,21 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
     final credentials = _storageService.get(StorageKey.credentials) as String?;
     _spreadsheetId =
         _storageService.get(StorageKey.spreadsheetId) as String? ?? '';
-    return credentials != null && _spreadsheetId.isNotEmpty && _isConnected;
+    
+    if (credentials != null && _spreadsheetId.isNotEmpty) {
+      try {
+        await _initializeGSheets(credentials, _spreadsheetId);
+        return _isConnected;
+      } catch (e) {
+        debugPrint('Error during setup check: $e');
+        return false;
+      }
+    }
+    return false;
   }
 
   Future<void> _loadSavedConfig() async {
-    _spreadsheetId =
-        _storageService.get(StorageKey.spreadsheetId) as String? ?? '';
-    final credentials = _storageService.get(StorageKey.credentials) as String?;
-    if (credentials != null && _spreadsheetId.isNotEmpty) {
-      await _initializeGSheets(credentials, _spreadsheetId);
-    }
+    await isSetupComplete();
     notifyListeners();
   }
 
@@ -43,7 +48,8 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
       await _storageService.set(StorageKey.credentials, contents);
       await _initializeGSheets(contents, _spreadsheetId);
     } catch (e) {
-      Exception('Error reading credentials file: $e'); // Add this line
+      debugPrint('Error reading credentials file: $e');
+      throw Exception('Error reading credentials file: $e');
     }
   }
 
@@ -71,7 +77,7 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
 
   Future<void> connect() async {
     final credentials = _storageService.get(StorageKey.credentials) as String?;
-    debugPrint('Stored credentials: $credentials'); // Add this line
+    debugPrint('Stored credentials: $credentials');
     if (credentials != null) {
       await _initializeGSheets(credentials, _spreadsheetId);
     } else {
