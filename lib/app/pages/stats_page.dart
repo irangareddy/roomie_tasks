@@ -93,9 +93,10 @@ class StatsPage extends StatelessWidget {
         ...taskStats.entries.map((entry) {
           if (entry.value is Map<String, dynamic>) {
             return _buildTaskCard(
-                entry.key,
-                Map<String, int>.from(entry.value as Map<String, dynamic>),
-                theme,);
+              entry.key,
+              Map<String, int>.from(entry.value as Map<String, dynamic>),
+              theme,
+            );
           } else {
             return const SizedBox.shrink();
           }
@@ -105,7 +106,10 @@ class StatsPage extends StatelessWidget {
   }
 
   Widget _buildTaskCard(
-      String taskName, Map<String, int> roommateStats, ThemeData theme,) {
+    String taskName,
+    Map<String, int> roommateStats,
+    ThemeData theme,
+  ) {
     final total = roommateStats.values.reduce((a, b) => a + b);
     final blueShades = _generateBlueShades(roommateStats.length);
 
@@ -116,9 +120,11 @@ class StatsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(taskName,
-                style: theme.textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),),
+            Text(
+              taskName,
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             ...roommateStats.entries.map((entry) {
               final percentage = total > 0 ? (entry.value / total * 100) : 0;
@@ -128,10 +134,15 @@ class StatsPage extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                          child: Text(entry.key,
-                              style: theme.textTheme.bodyMedium,),),
-                      Text('${entry.value} (${percentage.toStringAsFixed(1)}%)',
-                          style: theme.textTheme.bodyMedium,),
+                        child: Text(
+                          entry.key,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                      Text(
+                        '${entry.value} (${percentage.toStringAsFixed(1)}%)',
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),

@@ -22,7 +22,7 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
 
   Future<bool> isSetupComplete() async {
     final credentials = _storageService.get(StorageKey.credentials) as String?;
-        _spreadsheetId =
+    _spreadsheetId =
         _storageService.get(StorageKey.spreadsheetId) as String? ?? '';
     return credentials != null && _spreadsheetId.isNotEmpty && _isConnected;
   }

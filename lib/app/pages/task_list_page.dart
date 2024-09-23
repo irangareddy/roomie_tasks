@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:roomie_tasks/app/models/task.dart';
 import 'package:roomie_tasks/app/pages/task_modal_sheet.dart';
 import 'package:roomie_tasks/app/providers/providers.dart';
+import 'package:roomie_tasks/app/providers/theme_provider.dart';
 import 'package:roomie_tasks/config/routes/routes.dart';
 
 class TaskListPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class TaskListPage extends StatefulWidget {
 
 class _TaskListPageState extends State<TaskListPage> {
   bool _isLoading = true;
+  TaskStatus? _currentFilter;
 
   @override
   void initState() {
@@ -43,190 +45,277 @@ class _TaskListPageState extends State<TaskListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final setupProvider = Provider.of<GoogleSheetsSetupProvider>(context);
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final theme = Theme.of(context);
+        return FutureBuilder<bool>(
+          future: Provider.of<GoogleSheetsSetupProvider>(context, listen: false)
+              .isSetupComplete(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
 
-    return FutureBuilder<bool>(
-      future: setupProvider.isSetupComplete(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),);
-        }
+            if (snapshot.data == false) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('Setup Required')),
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () => context.go(AppRoutes.googleSheetsSetup),
+                    child: const Text('Complete Google Sheets Setup'),
+                  ),
+                ),
+              );
+            }
 
-        if (snapshot.data == false) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Setup Required')),
-            body: Center(
-              child: ElevatedButton(
-                onPressed: () => context.go(AppRoutes.googleSheetsSetup),
-                child: const Text('Complete Google Sheets Setup'),
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Roomie Tasks'),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.people),
+                    onPressed: () => context.push(AppRoutes.addRoommates),
+                    tooltip: 'Manage Roommates',
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.list_alt),
+                    onPressed: () => context.push(AppRoutes.addTasks),
+                    tooltip: 'Manage Template Tasks',
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.settings),
+                    onPressed: () => context.push(AppRoutes.settings),
+                    tooltip: 'Settings',
+                  ),
+                ],
               ),
-            ),
-          );
-        }
+              body: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Consumer2<TaskProvider, RoommateProvider>(
+                      builder:
+                          (context, taskProvider, roommateProvider, child) {
+                        final tasks = taskProvider.assignedTasks;
+                        final hasRoommates =
+                            roommateProvider.roommates.isNotEmpty;
+                        final hasTaskTemplates =
+                            taskProvider.taskTemplates.isNotEmpty;
 
-        // Rest of your existing Scaffold for the main app
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Roomie Tasks'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.people),
-                onPressed: () => context.push(AppRoutes.addRoommates),
-                tooltip: 'Manage Roommates',
-              ),
-              IconButton(
-                icon: const Icon(Icons.list_alt),
-                onPressed: () => context.push(AppRoutes.addTasks),
-                tooltip: 'Manage Template Tasks',
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () => context.push(AppRoutes.settings),
-                tooltip: 'Settings',
-              ),
-            ],
-          ),
-          body: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Consumer2<TaskProvider, RoommateProvider>(
-                  builder: (context, taskProvider, roommateProvider, child) {
-                    final tasks = taskProvider.assignedTasks;
-                    final hasRoommates = roommateProvider.roommates.isNotEmpty;
-                    final hasTaskTemplates =
-                        taskProvider.taskTemplates.isNotEmpty;
-
-                    if (!hasRoommates || !hasTaskTemplates) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (!hasRoommates)
-                              ElevatedButton(
-                                onPressed: () =>
-                                    context.go(AppRoutes.addRoommates),
-                                child: const Text('Add Roommates'),
-                              ),
-                            if (!hasTaskTemplates)
-                              ElevatedButton(
-                                onPressed: () => context.go(AppRoutes.addTasks),
-                                child: const Text('Add Task Templates'),
-                              ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    if (tasks.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              'assets/images/create_tasks.svg',
-                              height: 300,
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'No Roomie Tasks available.',
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'Tap the + button to add a new task.',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            const SizedBox(height: 200),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      itemCount: tasks.length,
-                      itemBuilder: (context, index) {
-                        final task = tasks[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 8, horizontal: 16),
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          color: Theme.of(context).cardColor,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
+                        if (!hasRoommates || !hasTaskTemplates) {
+                          return Center(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  task.name,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Assigned to: ${task.assignedTo ?? 'Unassigned'}',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Due: ${task.endDate?.toString().split(' ')[0] ?? 'Not set'}',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    DropdownButton<TaskStatus>(
-                                      value: task.status,
-                                      onChanged: (TaskStatus? newValue) {
-                                        if (newValue != null) {
-                                          _updateTaskStatus(task, newValue);
-                                        }
-                                      },
-                                      items: TaskStatus.values
-                                          .map<DropdownMenuItem<TaskStatus>>(
-                                              (TaskStatus value) {
-                                        return DropdownMenuItem<TaskStatus>(
-                                          value: value,
-                                          child: Text(
-                                            _mapTaskStatus(value),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          onPressed: () =>
-                                              _showTaskModal(task: task),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete),
-                                          onPressed: () => _deleteTask(task),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                if (!hasRoommates)
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        context.go(AppRoutes.addRoommates),
+                                    child: const Text('Add Roommates'),
+                                  ),
+                                if (!hasTaskTemplates)
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        context.go(AppRoutes.addTasks),
+                                    child: const Text('Add Task Templates'),
+                                  ),
                               ],
                             ),
-                          ),
+                          );
+                        }
+
+                        if (tasks.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/images/create_tasks.svg',
+                                  height: 300,
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  'No Roomie Tasks available.',
+                                  style: theme.textTheme.headlineSmall,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  'Tap the + button to add a new task.',
+                                  style: theme.textTheme.bodyLarge,
+                                ),
+                                const SizedBox(height: 200),
+                              ],
+                            ),
+                          );
+                        }
+
+                        final filteredTasks = _currentFilter == null
+                            ? tasks
+                            : tasks
+                                .where((task) => task.status == _currentFilter)
+                                .toList();
+
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Text('Filter: '),
+                                  DropdownButton<TaskStatus?>(
+                                    value: _currentFilter,
+                                    items: [
+                                      const DropdownMenuItem<TaskStatus?>(
+                                        child: Text('All'),
+                                      ),
+                                      ...TaskStatus.values.map((status) {
+                                        return DropdownMenuItem<TaskStatus?>(
+                                          value: status,
+                                          child: Text(_mapTaskStatus(status)),
+                                        );
+                                      }),
+                                    ],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _currentFilter = value;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: filteredTasks.length,
+                                itemBuilder: (context, index) {
+                                  final task = filteredTasks[index];
+                                  return Card(
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 16,
+                                    ),
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    color: theme.colorScheme.surface,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            task.name,
+                                            style: theme.textTheme.titleLarge
+                                                ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  theme.colorScheme.onSurface,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Assigned to: ${task.assignedTo ?? 'Unassigned'}',
+                                            style: theme.textTheme.bodyLarge
+                                                ?.copyWith(
+                                              color: theme.colorScheme.onSurface
+                                                  .withOpacity(0.8),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Due: ${task.endDate?.toString().split(' ')[0] ?? 'Not set'}',
+                                            style: theme.textTheme.bodyLarge
+                                                ?.copyWith(
+                                              color: theme.colorScheme.onSurface
+                                                  .withOpacity(0.8),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              DropdownButton<TaskStatus>(
+                                                value: task.status,
+                                                onChanged:
+                                                    (TaskStatus? newValue) {
+                                                  if (newValue != null) {
+                                                    _updateTaskStatus(
+                                                      task,
+                                                      newValue,
+                                                    );
+                                                  }
+                                                },
+                                                items: TaskStatus.values.map<
+                                                        DropdownMenuItem<
+                                                            TaskStatus>>(
+                                                    (TaskStatus value) {
+                                                  return DropdownMenuItem<
+                                                      TaskStatus>(
+                                                    value: value,
+                                                    child: Text(
+                                                      _mapTaskStatus(value),
+                                                      style: TextStyle(
+                                                        color: theme.colorScheme
+                                                            .onSurface,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                                dropdownColor:
+                                                    theme.colorScheme.surface,
+                                                icon: Icon(
+                                                  Icons.arrow_drop_down,
+                                                  color: theme
+                                                      .colorScheme.onSurface,
+                                                ),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: Icon(
+                                                      Icons.edit,
+                                                      color: theme
+                                                          .colorScheme.primary,
+                                                    ),
+                                                    onPressed: () =>
+                                                        _showTaskModal(
+                                                            task: task),
+                                                  ),
+                                                  IconButton(
+                                                    icon: Icon(
+                                                      Icons.delete,
+                                                      color: theme
+                                                          .colorScheme.error,
+                                                    ),
+                                                    onPressed: () =>
+                                                        _deleteTask(task),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         );
                       },
-                    );
-                  },
-                ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: _showTaskModal,
-            tooltip: 'Add Task',
-            child: const Icon(Icons.add),
-          ),
+                    ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: _showTaskModal,
+                tooltip: 'Add Task',
+                child: const Icon(Icons.add),
+              ),
+            );
+          },
         );
       },
     );

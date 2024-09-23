@@ -56,8 +56,9 @@ class TaskProvider with ChangeNotifier {
   Future<void> updateAssignedTask(Task task) async {
     final existingTask = _assignedTasks.firstWhere((t) => t.id == task.id);
     final updatedTask = task.copyWith(
-        originalAssignee:
-            existingTask.originalAssignee ?? existingTask.assignedTo,);
+      originalAssignee:
+          existingTask.originalAssignee ?? existingTask.assignedTo,
+    );
     await _sheetsService.taskService.updateAssignedTask(updatedTask);
     final index = _assignedTasks.indexWhere((t) => t.id == updatedTask.id);
     if (index != -1) {

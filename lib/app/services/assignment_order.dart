@@ -93,11 +93,11 @@ class AssignmentOrder {
     lastUpdated = DateTime.now();
   }
 
- void _updateFairnessScore(String roommate, TaskFrequency frequency) {
+  void _updateFairnessScore(String roommate, TaskFrequency frequency) {
     final frequencyScore = _getFrequencyScore(frequency);
-    fairnessScores[roommate] = (fairnessScores[roommate] ?? 0.0) + frequencyScore;
+    fairnessScores[roommate] =
+        (fairnessScores[roommate] ?? 0.0) + frequencyScore;
   }
-
 
   double _getFrequencyScore(TaskFrequency frequency) {
     switch (frequency) {

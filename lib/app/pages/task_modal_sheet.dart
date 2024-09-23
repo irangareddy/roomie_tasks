@@ -159,48 +159,56 @@ class _TaskModalSheetState extends State<TaskModalSheet> {
               },
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate,
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _startDate = picked;
-                        });
-                      }
-                    },
-                    child: Text(
-                      'Start Date: ${_startDate.toString().split(' ')[0]}',
-                    ),
-                  ),
+            TextFormField(
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Start Date',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _startDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _startDate = picked;
+                      });
+                    }
+                  },
                 ),
-                Expanded(
-                  child: TextButton(
-                    onPressed: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _endDate,
-                        firstDate: _startDate,
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _endDate = picked;
-                        });
-                      }
-                    },
-                    child:
-                        Text('End Date: ${_endDate.toString().split(' ')[0]}'),
-                  ),
+              ),
+              controller: TextEditingController(
+                text: _startDate.toString().split(' ')[0],
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'End Date',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _endDate,
+                      firstDate: _startDate,
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _endDate = picked;
+                      });
+                    }
+                  },
                 ),
-              ],
+              ),
+              controller: TextEditingController(
+                text: _endDate.toString().split(' ')[0],
+              ),
             ),
             const SizedBox(height: 16),
             if (widget.task != null)

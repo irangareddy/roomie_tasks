@@ -86,9 +86,7 @@ class TaskService {
 
   // CRUD operations for assigned tasks
   Future<List<Task>> loadAssignedTasks() async {
-    print('called load assigned tasks in task service');
     final rows = await assignedTasksSheet.values.allRows(fromRow: 2);
-    print(rows);
     return rows
         .map((row) {
           try {
@@ -180,7 +178,7 @@ class TaskService {
 
       return assignedTasks;
     } catch (e) {
-      print('Error generating weekly tasks: $e');
+      Exception('Error generating weekly tasks: $e');
       return [];
     }
   }
@@ -277,7 +275,9 @@ class TaskService {
       );
       await updateAssignedTask(swappedBackTask);
       _assignmentOrder.updateAssignment(
-          swappedBackTask.name, originalAssignee!,);
+        swappedBackTask.name,
+        originalAssignee!,
+      );
       await _saveAssignmentOrder();
     }
   }
