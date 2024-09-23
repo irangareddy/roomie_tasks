@@ -161,7 +161,7 @@ class _TaskListPageState extends State<TaskListPage> {
                   const SizedBox(height: 10),
                   Text(
                     // ignore: lines_longer_than_80_chars
-                    'Feeling the vibe? Smash that + to set up some tasks!',
+                    'Smash that + to set up some tasks!',
                     style: theme.textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 200),
