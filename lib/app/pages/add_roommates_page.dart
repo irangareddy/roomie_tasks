@@ -151,27 +151,43 @@ class __AddRoommateSheetState extends State<_AddRoommateSheet> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  bool _isLoading = false;
 
   Future<void> _addRoommate() async {
     if (_nameController.text.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
+
       final roommate = Roommate(
         name: _nameController.text,
         email: _emailController.text.isNotEmpty ? _emailController.text : null,
         phoneNumber:
             _phoneController.text.isNotEmpty ? _phoneController.text : null,
       );
-      final success =
-          await context.read<RoommateProvider>().addRoommate(roommate);
-      if (success) {
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A roommate with this name already exists.'),
-          ),
-        );
+
+      try {
+        final success =
+            await context.read<RoommateProvider>().addRoommate(roommate);
+        if (success) {
+          Navigator.pop(context);
+        } else {
+          _showErrorSnackBar('A roommate with this name already exists.');
+        }
+      } catch (e) {
+        _showErrorSnackBar('An error occurred while adding the roommate.');
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -211,8 +227,16 @@ class __AddRoommateSheetState extends State<_AddRoommateSheet> {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed: _addRoommate,
-            child: const Text('Add Roommate'),
+            onPressed: _isLoading ? null : _addRoommate,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text('Add Roommate'),
           ),
           const SizedBox(height: 16),
         ],

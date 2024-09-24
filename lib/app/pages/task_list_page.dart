@@ -309,9 +309,9 @@ class _TaskListPageState extends State<TaskListPage> {
     final tomorrow = today.add(const Duration(days: 1));
 
     if (date == today) {
-      return 'Today, ${DateFormat('EEEE, MMM d, yyyy').format(date)}';
+      return 'Today';
     } else if (date == tomorrow) {
-      return 'Tomorrow, ${DateFormat('EEEE, MMM d, yyyy').format(date)}';
+      return 'Tomorrow';
     } else {
       return DateFormat('EEEE, MMM d, yyyy').format(date);
     }
