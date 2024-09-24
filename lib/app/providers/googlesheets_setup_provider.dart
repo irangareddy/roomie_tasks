@@ -24,7 +24,7 @@ class GoogleSheetsSetupProvider extends ChangeNotifier {
     final credentials = _storageService.get(StorageKey.credentials) as String?;
     _spreadsheetId =
         _storageService.get(StorageKey.spreadsheetId) as String? ?? '';
-    
+
     if (credentials != null && _spreadsheetId.isNotEmpty) {
       try {
         await _initializeGSheets(credentials, _spreadsheetId);
