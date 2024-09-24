@@ -6,7 +6,7 @@
 
 Roomie Tasks is a Flutter application for managing shared tasks among roommates.
 
-![Roomie Tasks Banner](./RT-Banner.png)
+![Roomie Tasks Banner](./roomie-task-banner.png)
 
 ## Getting Started 🚀
 
